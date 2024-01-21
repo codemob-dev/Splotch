@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Splotch;
-using UnityEngine;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-using System.Reflection;
-using HarmonyLib;
 
 public static class Logger
 {
+    /// <summary>
+    /// It gets the function that called the function thats happening rn.
+    /// Basically if A() calls B() then B() calls this, then this will tell you
+    /// what class A() is from
+    /// </summary>
+    /// <returns>The class that called your function</returns>
     private static string getCallingClass()
     {
+        // Basically its meant for errors but it also logs every function that is called!
         StackTrace stackTrace = new StackTrace();
         if (stackTrace.FrameCount >= 3)
         {
@@ -25,11 +22,16 @@ public static class Logger
         }
         else
         {
+            // This should never happen, but if it does here it is.
             return "n/a";
             //Console.WriteLine("Unable to determine calling class.");
         }
         return null;
     }
+
+    /// <summary>
+    /// Initializes the console.
+    /// </summary>
     public static void InitLogger()
     {
         // Create a new process
@@ -38,18 +40,17 @@ public static class Logger
         process.StartInfo.RedirectStandardInput = true;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
-        //process.StartInfo.CreateNoWindow = true;
-        process.StartInfo.CreateNoWindow = false;  // Set this to true if you want to hide the window
+        process.StartInfo.CreateNoWindow = false;  // Set this to true if you want to hide the window (Might be how we disable the window)
 
         // Start the process
         process.Start();
-        // Wait for a moment to ensure the new console window has time to open
+        // It breaks if this isn't here.
         System.Threading.Thread.Sleep(1000);
 
-        // Create a new console window and attach it to the process
+        // Connects the console window to bopl
         AttachConsole((uint) process.Id);
 
-        // Redirect standard output to the new console window
+        // Sets the output to the console window thing
         StreamWriter sw = new StreamWriter(Console.OpenStandardOutput());
         sw.AutoFlush = true;
         Console.SetOut(sw);
@@ -59,14 +60,14 @@ public static class Logger
         Logger.Warning("Warn test");
         Logger.Error("Error test");
 
-        // Now you can write to the new console window
+
         Logger.Log("Logging initialized.");
 
-
-        // Close the process when done
-        //process.WaitForExit();
     }
 
+    /// <summary>
+    /// Logs into console and output_log.txt
+    /// </summary>
     public static void Log(string message)
     {
         string formattedString = $"[INFO    : {getCallingClass()}] {message}";
@@ -77,6 +78,9 @@ public static class Logger
         UnityEngine.Debug.Log(formattedString);
     }
 
+    /// <summary>
+    /// Logs a warning into console and logs to output_log.txt
+    /// </summary>
     public static void Warning(string message)
     {
         string formattedString = $"[WARNING : {getCallingClass()}] {message}";
@@ -88,6 +92,10 @@ public static class Logger
 
         Console.ForegroundColor = ConsoleColor.Gray;
     }
+
+    /// <summary>
+    /// Logs an error into console and logs to output_log.txt
+    /// </summary>
     public static void Error(string message)
     {
         string formattedString = $"[ERROR   : {getCallingClass()}] {message}";
@@ -100,7 +108,7 @@ public static class Logger
         Console.ForegroundColor = ConsoleColor.Gray;
     }
 
-    // Import the AttachConsole function from kernel32.dll
+    // AttachConsole lets me "hook" the logger into the thing
     [System.Runtime.InteropServices.DllImport("kernel32.dll")]
     private static extern bool AttachConsole(uint dwProcessId);
 }
