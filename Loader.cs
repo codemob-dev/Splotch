@@ -1,4 +1,5 @@
 ﻿using UnityEngine.SceneManagement;
+using Splotch;
 
 namespace Splotch.Loader
 {
@@ -17,6 +18,11 @@ namespace Splotch.Loader
         /// <param name="loadSceneMode">The scene mode</param>
         public static void OnEnterScene(Scene scene, LoadSceneMode loadSceneMode)
         {
+            
+            Logger.InitLogger();
+
+            Logger.Log("Entering main menu");
+
             enteredScene = true;
             Patcher.DoPatching();
             ModLoader.ModLoader.loadMods();
