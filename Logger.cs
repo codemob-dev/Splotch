@@ -14,6 +14,22 @@ using HarmonyLib;
 
 public static class Logger
 {
+    private static string getCallingClass()
+    {
+        StackTrace stackTrace = new StackTrace();
+        if (stackTrace.FrameCount >= 3)
+        {
+            Type callingClass = stackTrace.GetFrame(2).GetMethod().DeclaringType;
+            //Console.WriteLine($"Calling class: {callingClass?.Name}");
+            return callingClass?.Name;
+        }
+        else
+        {
+            return "n/a";
+            //Console.WriteLine("Unable to determine calling class.");
+        }
+        return null;
+    }
     public static void InitLogger()
     {
         // Create a new process
@@ -38,8 +54,14 @@ public static class Logger
         sw.AutoFlush = true;
         Console.SetOut(sw);
 
+
+        Logger.Log("Log test");
+        Logger.Warning("Warn test");
+        Logger.Error("Error test");
+
         // Now you can write to the new console window
         Logger.Log("Logging initialized.");
+
 
         // Close the process when done
         //process.WaitForExit();
@@ -47,23 +69,34 @@ public static class Logger
 
     public static void Log(string message)
     {
+        string formattedString = $"[INFO    : {getCallingClass()}] {message}";
+
         Console.ForegroundColor = ConsoleColor.Gray;
-        Console.WriteLine(message);
-        UnityEngine.Debug.Log(message);
+
+        Console.WriteLine(formattedString);
+        UnityEngine.Debug.Log(formattedString);
     }
 
     public static void Warning(string message)
     {
+        string formattedString = $"[WARNING : {getCallingClass()}] {message}";
+
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine(message);
-        UnityEngine.Debug.LogWarning(message);
+
+        Console.WriteLine(formattedString);
+        UnityEngine.Debug.LogWarning(formattedString);
+
         Console.ForegroundColor = ConsoleColor.Gray;
     }
     public static void Error(string message)
     {
+        string formattedString = $"[ERROR   : {getCallingClass()}] {message}";
+
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(message);
-        UnityEngine.Debug.LogError(message);
+
+        Console.WriteLine(formattedString);
+        UnityEngine.Debug.LogError(formattedString);
+
         Console.ForegroundColor = ConsoleColor.Gray;
     }
 
