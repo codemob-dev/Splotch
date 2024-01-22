@@ -1,5 +1,6 @@
 ﻿using UnityEngine.SceneManagement;
 using Splotch;
+using System.Reflection;
 
 namespace Splotch.Loader
 {
@@ -18,10 +19,10 @@ namespace Splotch.Loader
         /// <param name="loadSceneMode">The scene mode</param>
         public static void OnEnterScene(Scene scene, LoadSceneMode loadSceneMode)
         {
-            
             Logger.InitLogger();
 
-            Logger.Log("Entering main menu");
+            AssemblyName name = Assembly.GetExecutingAssembly().GetName();
+            Logger.Log($"Entering main menu on version {name.Version}");
 
             enteredScene = true;
             Patcher.DoPatching();
@@ -31,8 +32,15 @@ namespace Splotch.Loader
         /// <summary>
         /// The main entrypoint for Splotch, called by Doorstop.
         /// </summary>
-        public static void Main()   
+        public static void Main()
         {
+            Splotch.Config.CreateConfigAndLoadSplotchConfig();
+
+            if(!Config.LoadedSplotchConfig.splotchEnabled) 
+            {
+                return;
+            }
+
             SceneManager.sceneLoaded += SceneLoaded;
         }
 

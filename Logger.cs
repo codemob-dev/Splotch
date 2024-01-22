@@ -31,8 +31,10 @@ public static class Logger
 
     /// <summary>
     /// Initializes the console.
+    /// 
+    /// CAN ONLY BE CALLED BY SPLOTCH
     /// </summary>
-    public static void InitLogger()
+    internal static void InitLogger()
     {
         // Create a new process
         Process process = new Process();
@@ -40,7 +42,7 @@ public static class Logger
         process.StartInfo.RedirectStandardInput = true;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = false;  // Set this to true if you want to hide the window (Might be how we disable the window)
+        process.StartInfo.CreateNoWindow = !Splotch.Config.LoadedSplotchConfig.consoleEnabled;  // Set this to true if you want to hide the window (Might be how we disable the window)
 
         // Start the process
         process.Start();
@@ -59,6 +61,7 @@ public static class Logger
         Logger.Log("Log test");
         Logger.Warning("Warn test");
         Logger.Error("Error test");
+        Logger.Debug("Debug test");
 
 
         Logger.Log("Logging initialized.");
@@ -101,6 +104,27 @@ public static class Logger
         string formattedString = $"[ERROR   : {getCallingClass()}] {message}";
 
         Console.ForegroundColor = ConsoleColor.Red;
+
+        Console.WriteLine(formattedString);
+        UnityEngine.Debug.LogError(formattedString);
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+    }
+
+    /// <summary>
+    /// Logs an debug message into console and logs to output_log.txt.
+    /// 
+    /// <c> VERBOSE LOGGING NEEDS TO BE ENABLED </c>
+    /// </summary>
+    public static void Debug(string message)
+    {
+        if (!Splotch.Config.LoadedSplotchConfig.VerboseLoggingEnabled)
+        {
+            return;
+        }
+        string formattedString = $"[DEBUG   : {getCallingClass()}] {message}";
+
+        Console.ForegroundColor = ConsoleColor.White;
 
         Console.WriteLine(formattedString);
         UnityEngine.Debug.LogError(formattedString);
