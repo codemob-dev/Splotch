@@ -1,15 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography;
-using System.Threading;
 using UnityEngine;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using static Splotch.Config;
-using Splotch;
-using System.CodeDom;
-using UnityEngine.Networking;
 
 namespace Splotch
 {

@@ -1,7 +1,5 @@
 ﻿using UnityEngine.SceneManagement;
-using Splotch;
 using System.Reflection;
-using System;
 
 namespace Splotch.Loader
 {
