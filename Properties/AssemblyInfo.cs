@@ -37,4 +37,4 @@ using UnityEngine;
 // X: major versions
 // Y: feature addition/ removal
 // Z: small patch/ bugfix
-[assembly: AssemblyVersion("0.1.2")]
+[assembly: AssemblyVersion("0.1.3")]
