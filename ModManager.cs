@@ -34,8 +34,6 @@ namespace Splotch
         public static string GetLoadedModsInfoText()
         {
             string modInfoString = "";
-            Logger.Log(string.Join(", ", loadedMods));
-            //Debug.Log(string.Join(", ", loadedMods));
             int i = 0;
             foreach (var loadedMod in loadedMods)
             {
