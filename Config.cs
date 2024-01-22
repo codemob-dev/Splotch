@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Splotch.Loader.ModLoader;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using UnityEngine;
 using YamlDotNet;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
@@ -22,14 +24,19 @@ namespace Splotch
             public bool VerboseLoggingEnabled;
         }
 
-        internal static SplotchConfig LoadedSplotchConfig;
+        internal static SplotchConfig LoadedSplotchConfig = new SplotchConfig
+        {
+            splotchEnabled = true,
+            consoleEnabled = true,
+            VerboseLoggingEnabled = true,
+        };
 
-        private struct SplotchConfigContainer
+        internal struct SplotchConfigContainer
         {
             public SplotchConfig splotchConfig;
         }
 
-        internal static void CreateConfig() // This basically just creates the config, and if it already exists, we return back
+        internal static void CreateConfigAndLoadSplotchConfig() // This basically just creates the config, and if it already exists, we return back
         {
             // WE CANNOT USE LOGGER HERE
             // WE CANNOT USE LOGGER HERE
@@ -50,8 +57,8 @@ namespace Splotch
                     splotchConfig = new SplotchConfig
                     { 
                         splotchEnabled = true,
-                        consoleEnabled = false,
-                        VerboseLoggingEnabled = false,
+                        consoleEnabled = true,
+                        VerboseLoggingEnabled = true,
                     }
                 };
 
@@ -61,10 +68,30 @@ namespace Splotch
                     .WithNamingConvention(CamelCaseNamingConvention.Instance)
                     .Build();
 
-                var yaml = serializer.Serialize(cont);
+                var yamlToWrite = serializer.Serialize(cont);
 
-                File.WriteAllText("splotch_config/splotchconfig.yaml", yaml);
+                File.WriteAllText("splotch_config/splotchconfig.yaml", yamlToWrite);
 
+            }
+            else
+            {
+                try {
+                    using (StreamReader reader = new StreamReader("splotch_config/splotchconfig.yaml"))
+                    {
+                        IDeserializer deserializer = new DeserializerBuilder()
+                            .WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+                        SplotchConfigContainer deserializedData = deserializer.Deserialize<SplotchConfigContainer>(reader);
+
+                        LoadedSplotchConfig.splotchEnabled = deserializedData.splotchConfig.splotchEnabled;
+                        LoadedSplotchConfig.consoleEnabled = deserializedData.splotchConfig.consoleEnabled;
+                        LoadedSplotchConfig.VerboseLoggingEnabled = deserializedData.splotchConfig.VerboseLoggingEnabled;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Logging hasn't been inited yet :P
+                    UnityEngine.Debug.LogException(ex);
+                }
             }
 
 

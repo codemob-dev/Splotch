@@ -37,6 +37,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="GuiModifications.cs" />
     <Compile Include="HarmonyLoader.cs" />
     <Compile Include="Loader.cs" />
