@@ -20,11 +20,15 @@ namespace Splotch.Loader.ModLoader
         /// <summary>
         /// Called by the <c>Loader</c>, loads all detected mods and logs any issues encountered during loading.
         /// </summary>
-        internal static void loadMods()
+        internal static void LoadMods()
         {
+            Logger.Log("Starting to load mods...");
+            int modCountLoaded = 0;
+            int modCountTot = 0;
             modFolderDirectory = Directory.CreateDirectory(MOD_FOLDER_PATH);
             foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories())
             {
+                modCountTot++;
                 string modFolderPath = modFolder.FullName;
                 string modInfoPath = Path.Combine(modFolderPath, MOD_INFO_FILE_NAME);
                 if (File.Exists(modInfoPath))
@@ -40,26 +44,34 @@ namespace Splotch.Loader.ModLoader
                             data = deserializedData.ToModInfo();
                         }
 
-                        bool loadSuccess = data.loadMod(modFolderPath);
+                        bool loadSuccess = data.LoadMod(modFolderPath);
                         if (loadSuccess)
                         {
-                            Debug.Log($"{data} loaded");
-                        } else
+                            Logger.Log($"{data} loaded");
+                            modCountLoaded++;
+                            //Debug.Log($"{data} loaded");
+                        }
+                        else
                         {
-                            Debug.LogWarning($"Failed to load {data.name}");
+                            Logger.Warning($"Failed to load {data.name}");
+                            //Debug.LogWarning($"Failed to load {data.name}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError($"An error occurred while loading the modinfo.yaml file of {modFolder.Name}: \n{ex.Message}\n{ex.StackTrace}");
+                        Logger.Error($"An error occurred while loading the modinfo.yaml file of {modFolder.Name}: \n{ex.Message}\n{ex.StackTrace}");
+                        //Debug.LogError($"An error occurred while loading the modinfo.yaml file of {modFolder.Name}: \n{ex.Message}\n{ex.StackTrace}");
                     }
 
                 }
                 else
                 {
-                    Debug.LogWarning($"Invalid mod folder {modFolder.Name}!");
+                    Logger.Warning($"Invalid mod folder {modFolder.Name}!");
+                    //Debug.LogWarning($"Invalid mod folder {modFolder.Name}!");
                 }
             }
+
+            Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
         }
     }
 
@@ -68,15 +80,15 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     class DeserializedModInfo
     {
-        public ModEntrypointData entrypoint { get; set; }
-        public ModAttributesData attributes { get; set; }
+        public ModEntrypointData Entrypoint { get; set; }
+        public ModAttributesData Attributes { get; set; }
         /// <summary>
         /// An internal class for the <c>entrypoint</c> section of the <c>modinfo.yaml</c> file.
         /// </summary>
         public class ModEntrypointData
         {
-            public string dll { get; set; }
-            public string className { get; set; }
+            public string DLL { get; set; }
+            public string ClassName { get; set; }
         }
 
         /// <summary>
@@ -84,12 +96,12 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         public class ModAttributesData
         {
-            public string id { get; set; }
-            public string name { get; set; }
+            public string ID { get; set; }
+            public string Name { get; set; }
 
-            public string description { get; set; } = "";
-            public string version { get; set; } = "1.0";
-            public string[] authors { get; set; } = { };
+            public string Description { get; set; } = "";
+            public string Version { get; set; } = "1.0";
+            public string[] Authors { get; set; } = { };
         }
 
         /// <summary>
@@ -98,7 +110,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(entrypoint.dll, entrypoint.className, attributes.id, attributes.name, attributes.description, attributes.version, attributes.authors);
+            return new ModInfo(Entrypoint.DLL, Entrypoint.ClassName, Attributes.ID, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
         }
     }
 
@@ -132,7 +144,7 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         /// <param name="modFolder">The folder the mod is contained in.</param>
         /// <returns><c>true</c> if the loading was successful and <c>false</c> if there was an error.</returns>
-        internal bool loadMod(string modFolder)
+        internal bool LoadMod(string modFolder)
         {
             try
             {
@@ -141,20 +153,24 @@ namespace Splotch.Loader.ModLoader
                 Type assemblyEntrypoint = assembly.GetType(className);
                 if (assemblyEntrypoint.BaseType == typeof(SplotchMod))
                 {
-                    splotchMod = (SplotchMod) Activator.CreateInstance(assemblyEntrypoint);
+                    splotchMod = (SplotchMod)Activator.CreateInstance(assemblyEntrypoint);
                     splotchMod.Setup(this);
                     splotchMod.OnLoad();
 
                     ModManager.loadedMods.Add(this);
 
                     return true;
-                } else
-                {
-                    Debug.LogError($"The main class in {name} does not extend SplotchMod!");
                 }
-            } catch (Exception ex)
+                else
+                {
+                    Logger.Error($"The main class in {name} does not extend SplotchMod!");
+                    //Debug.LogError($"The main class in {name} does not extend SplotchMod!");
+                }
+            }
+            catch (Exception ex)
             {
-                Debug.LogError($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
+                Logger.Error($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
+                //Debug.LogError($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
             }
             return false;
         }

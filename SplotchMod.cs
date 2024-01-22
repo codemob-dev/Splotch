@@ -8,13 +8,13 @@ namespace Splotch
     /// </summary>
     public abstract class SplotchMod
     {
-        public ModInfo modInfo { get; internal set; }
-        public Harmony harmony { get; internal set; }
+        public ModInfo ModInfo { get; internal set; }
+        public Harmony Harmony { get; internal set; }
 
         internal void Setup(ModInfo modInfo)
         {
-            this.modInfo = modInfo;
-            harmony = new Harmony(modInfo.id);
+            this.ModInfo = modInfo;
+            Harmony = new Harmony(modInfo.id);
 
         }
         /// <summary>
