@@ -20,7 +20,7 @@ namespace Splotch.Loader.ModLoader
         /// <summary>
         /// Called by the <c>Loader</c>, loads all detected mods and logs any issues encountered during loading.
         /// </summary>
-        internal static void loadMods()
+        internal static void LoadMods()
         {
             Logger.Log("Starting to load mods...");
             int modCountLoaded = 0;
@@ -44,7 +44,7 @@ namespace Splotch.Loader.ModLoader
                             data = deserializedData.ToModInfo();
                         }
 
-                        bool loadSuccess = data.loadMod(modFolderPath);
+                        bool loadSuccess = data.LoadMod(modFolderPath);
                         if (loadSuccess)
                         {
                             Logger.Log($"{data} loaded");
@@ -80,15 +80,15 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     class DeserializedModInfo
     {
-        public ModEntrypointData entrypoint { get; set; }
-        public ModAttributesData attributes { get; set; }
+        public ModEntrypointData Entrypoint { get; set; }
+        public ModAttributesData Attributes { get; set; }
         /// <summary>
         /// An internal class for the <c>entrypoint</c> section of the <c>modinfo.yaml</c> file.
         /// </summary>
         public class ModEntrypointData
         {
-            public string dll { get; set; }
-            public string className { get; set; }
+            public string DLL { get; set; }
+            public string ClassName { get; set; }
         }
 
         /// <summary>
@@ -96,12 +96,12 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         public class ModAttributesData
         {
-            public string id { get; set; }
-            public string name { get; set; }
+            public string ID { get; set; }
+            public string Name { get; set; }
 
-            public string description { get; set; } = "";
-            public string version { get; set; } = "1.0";
-            public string[] authors { get; set; } = { };
+            public string Description { get; set; } = "";
+            public string Version { get; set; } = "1.0";
+            public string[] Authors { get; set; } = { };
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(entrypoint.dll, entrypoint.className, attributes.id, attributes.name, attributes.description, attributes.version, attributes.authors);
+            return new ModInfo(Entrypoint.DLL, Entrypoint.ClassName, Attributes.ID, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
         }
     }
 
@@ -144,7 +144,7 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         /// <param name="modFolder">The folder the mod is contained in.</param>
         /// <returns><c>true</c> if the loading was successful and <c>false</c> if there was an error.</returns>
-        internal bool loadMod(string modFolder)
+        internal bool LoadMod(string modFolder)
         {
             try
             {

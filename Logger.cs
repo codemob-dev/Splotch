@@ -10,7 +10,7 @@ public static class Logger
     /// what class A() is from
     /// </summary>
     /// <returns>The class that called your function</returns>
-    private static string getCallingClass()
+    private static string GetCallingClass()
     {
         // Basically its meant for errors but it also logs every function that is called!
         StackTrace stackTrace = new StackTrace();
@@ -73,7 +73,7 @@ public static class Logger
     /// </summary>
     public static void Log(string message)
     {
-        string formattedString = $"[INFO    : {getCallingClass()}] {message}";
+        string formattedString = $"[INFO    : {GetCallingClass()}] {message}";
 
         Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -86,7 +86,7 @@ public static class Logger
     /// </summary>
     public static void Warning(string message)
     {
-        string formattedString = $"[WARNING : {getCallingClass()}] {message}";
+        string formattedString = $"[WARNING : {GetCallingClass()}] {message}";
 
         Console.ForegroundColor = ConsoleColor.Yellow;
 
@@ -101,7 +101,7 @@ public static class Logger
     /// </summary>
     public static void Error(string message)
     {
-        string formattedString = $"[ERROR   : {getCallingClass()}] {message}";
+        string formattedString = $"[ERROR   : {GetCallingClass()}] {message}";
 
         Console.ForegroundColor = ConsoleColor.Red;
 
@@ -122,7 +122,7 @@ public static class Logger
         {
             return;
         }
-        string formattedString = $"[DEBUG   : {getCallingClass()}] {message}";
+        string formattedString = $"[DEBUG   : {GetCallingClass()}] {message}";
 
         Console.ForegroundColor = ConsoleColor.White;
 

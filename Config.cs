@@ -1,16 +1,7 @@
-﻿using Splotch.Loader.ModLoader;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
 using UnityEngine;
-using YamlDotNet;
 using YamlDotNet.Core;
-using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -18,14 +9,14 @@ namespace Splotch
 {
     public static class Config
     {
-        internal struct SplotchConfig
+        internal struct SplotchConfigStruct
         {
             public bool splotchEnabled;
             public bool consoleEnabled;
             public bool verboseLoggingEnabled;
         }
 
-        internal static SplotchConfig LoadedSplotchConfig = new SplotchConfig
+        internal static SplotchConfigStruct LoadedSplotchConfig = new SplotchConfigStruct
         {
             splotchEnabled = true,
             consoleEnabled = true,
@@ -34,7 +25,7 @@ namespace Splotch
 
         internal struct SplotchConfigContainer
         {
-            public SplotchConfig splotchConfig;
+            public SplotchConfigStruct splotchConfig;
         }
 
         internal static void CreateConfigAndLoadSplotchConfig() // This basically just creates the config, and if it already exists, we return back
@@ -56,11 +47,11 @@ namespace Splotch
 
                 SplotchConfigContainer cont = new SplotchConfigContainer
                 {
-                    splotchConfig = new SplotchConfig
-                    { 
+                    splotchConfig = new SplotchConfigStruct
+                    {
                         splotchEnabled = true,
                         consoleEnabled = true,
-                        verboseLoggingEnabled = true,
+                        verboseLoggingEnabled = false,
                     }
                 };
 
