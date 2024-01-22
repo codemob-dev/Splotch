@@ -23,6 +23,7 @@ namespace Splotch.Loader
 
             AssemblyName name = Assembly.GetExecutingAssembly().GetName();
             Logger.Log($"Entering main menu on version {name.Version}");
+            
 
             enteredScene = true;
             Patcher.DoPatching();
@@ -36,7 +37,7 @@ namespace Splotch.Loader
         {
             Splotch.Config.CreateConfigAndLoadSplotchConfig();
 
-            if(!Config.LoadedSplotchConfig.splotchEnabled) 
+            if (!Config.LoadedSplotchConfig.splotchEnabled) 
             {
                 return;
             }

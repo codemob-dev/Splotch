@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using YamlDotNet;
+using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -21,14 +22,14 @@ namespace Splotch
         {
             public bool splotchEnabled;
             public bool consoleEnabled;
-            public bool VerboseLoggingEnabled;
+            public bool verboseLoggingEnabled;
         }
 
         internal static SplotchConfig LoadedSplotchConfig = new SplotchConfig
         {
             splotchEnabled = true,
             consoleEnabled = true,
-            VerboseLoggingEnabled = true,
+            verboseLoggingEnabled = true,
         };
 
         internal struct SplotchConfigContainer
@@ -47,6 +48,7 @@ namespace Splotch
             {
                 Directory.CreateDirectory("splotch_config");
             }
+
             if (!File.Exists("splotch_config/splotchconfig.yaml"))
             {
                 File.Create("splotch_config/splotchconfig.yaml");
@@ -58,7 +60,7 @@ namespace Splotch
                     { 
                         splotchEnabled = true,
                         consoleEnabled = true,
-                        VerboseLoggingEnabled = true,
+                        verboseLoggingEnabled = true,
                     }
                 };
 
@@ -75,7 +77,9 @@ namespace Splotch
             }
             else
             {
+
                 try {
+
                     using (StreamReader reader = new StreamReader("splotch_config/splotchconfig.yaml"))
                     {
                         IDeserializer deserializer = new DeserializerBuilder()
@@ -84,13 +88,17 @@ namespace Splotch
 
                         LoadedSplotchConfig.splotchEnabled = deserializedData.splotchConfig.splotchEnabled;
                         LoadedSplotchConfig.consoleEnabled = deserializedData.splotchConfig.consoleEnabled;
-                        LoadedSplotchConfig.VerboseLoggingEnabled = deserializedData.splotchConfig.VerboseLoggingEnabled;
+                        LoadedSplotchConfig.verboseLoggingEnabled = deserializedData.splotchConfig.verboseLoggingEnabled;
                     }
+                }
+                catch (YamlException ex)
+                {
+                    Debug.LogException(ex);
                 }
                 catch (Exception ex)
                 {
                     // Logging hasn't been inited yet :P
-                    UnityEngine.Debug.LogException(ex);
+                    Debug.LogException(ex);
                 }
             }
 
