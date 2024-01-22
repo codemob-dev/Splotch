@@ -1,5 +1,4 @@
 ﻿using UnityEngine.SceneManagement;
-using Splotch;
 using System.Reflection;
 
 namespace Splotch.Loader
@@ -9,6 +8,16 @@ namespace Splotch.Loader
     /// </summary>
     public static class Loader
     {
+
+        struct SplotchConfigContainer
+        {
+            public string modName;
+            public int someValue;
+        }
+
+
+
+
         public static bool enteredScene = false;
 
         /// <summary>
@@ -23,7 +32,7 @@ namespace Splotch.Loader
 
             AssemblyName name = Assembly.GetExecutingAssembly().GetName();
             Logger.Log($"Entering main menu on version {name.Version}");
-            
+
 
             enteredScene = true;
             Patcher.DoPatching();
