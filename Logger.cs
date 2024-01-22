@@ -118,7 +118,7 @@ public static class Logger
     /// </summary>
     public static void Debug(string message)
     {
-        if (!Splotch.Config.LoadedSplotchConfig.VerboseLoggingEnabled)
+        if (!Splotch.Config.LoadedSplotchConfig.verboseLoggingEnabled)
         {
             return;
         }
