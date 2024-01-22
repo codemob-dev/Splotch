@@ -27,7 +27,7 @@ namespace Splotch.Loader
 
             enteredScene = true;
             Patcher.DoPatching();
-            ModLoader.ModLoader.loadMods();
+            ModLoader.ModLoader.LoadMods();
         }
 
         /// <summary>
