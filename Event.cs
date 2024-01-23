@@ -1,16 +1,16 @@
 ﻿using HarmonyLib;
-using Splotch.Event.AbilityEvents;
 using Splotch.Loader;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.ConstrainedExecution;
 
 namespace Splotch.Event
 {
 
+    /// <summary>
+    /// Manages various events that happen in-game
+    /// </summary>
     public static class EventManager
     {
         public static Dictionary<Type, List<MethodInfo>> registeredEventHandlers = new Dictionary<Type, List<MethodInfo>>();
@@ -40,7 +40,7 @@ namespace Splotch.Event
                                 }
                                 registeredEventHandlers[eventType].Add(eventHandler);
 
-                                Logger.Log($"Successfully registered event handler \"{eventHandler.Name}\"!");
+                                Logger.Debug($"Successfully registered event handler \"{eventHandler.Name}\"!");
                             }
                             else
                             {
@@ -60,6 +60,9 @@ namespace Splotch.Event
             }
         }
 
+        /// <summary>
+        /// Searches for Events and runs their harmony patches
+        /// </summary>
         internal static void PatchEventTypes()
         {
             // retrieve all types that extend Event
@@ -78,19 +81,33 @@ namespace Splotch.Event
 
 
         }
+
+        /// <summary>
+        /// Loads the patcher
+        /// </summary>
         internal static void Load()
         {
             PatchEventTypes();
         }
     }
 
+    /// <summary>
+    /// A basic event, any extensions of it will automatically be loaded
+    /// </summary>
     public abstract class Event
     {
+        /// <summary>
+        /// Called after the event's patches are ran
+        /// </summary>
         public static void Setup()
         {
 
         }
 
+        /// <summary>
+        /// Call this inside of your harmony patch to run all of the registered event handlers
+        /// </summary>
+        /// <param name="e">An instance of the event class, should be created during the harmony patch</param>
         public static void RunHandlers(Event e)
         {
             if (EventManager.registeredEventHandlers.ContainsKey(e.GetType()))
@@ -103,20 +120,39 @@ namespace Splotch.Event
         }
     }
 
+    /// <summary>
+    /// An event that can be cancelled
+    /// </summary>
     public abstract class CancellableEvent : Event
     {
         public bool Cancelled { get; set; } = false;
     }
 
+    /// <summary>
+    /// Marks functions as event handlers.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class EventHandler : Attribute { };
 }
 
 namespace Splotch.Event.AbilityEvents
 {
+    /// <summary>
+    /// A class that should be extended by any ability-related events
+    /// </summary>
     public abstract class AbilityEvent : CancellableEvent
     {
+
+        /// <summary>
+        /// Gets the ability related to the event
+        /// </summary>
+        /// <returns>The ability</returns>
         public abstract Ability GetAbility();
+
+        /// <summary>
+        /// Returns the private abilityComponents field in the ability
+        /// </summary>
+        /// <returns>A list of abilityComponents</returns>
         public IAbilityComponent[] GetAbilityComponents()
         {
             Ability ability = GetAbility();
@@ -124,6 +160,10 @@ namespace Splotch.Event.AbilityEvents
             return field.GetValue(ability) as IAbilityComponent[];
         }
     }
+
+    /// <summary>
+    /// Called when a player begins holding down the button for an ability
+    /// </summary>
     public class AbilityEnterEvent : AbilityEvent
     {
         internal AbilityEnterEvent(Ability ability)
@@ -148,6 +188,9 @@ namespace Splotch.Event.AbilityEvents
         }
     }
 
+    /// <summary>
+    /// Called when a player stops holding down the button for an ability
+    /// </summary>
     public class AbilityExitEvent : AbilityEvent
     {
         internal AbilityExitEvent(Ability ability)
@@ -175,8 +218,15 @@ namespace Splotch.Event.AbilityEvents
 }
 namespace Splotch.Event.PlayerEvents
 {
+    /// <summary>
+    /// A class that should be extended by any player-related events
+    /// </summary>
     public abstract class PlayerEvent : Event
     {
+        /// <summary>
+        /// Retrieves the player related to the event
+        /// </summary>
+        /// <returns></returns>
         public abstract Player GetPlayer();
     }
 
@@ -191,11 +241,16 @@ namespace Splotch.Event.PlayerEvents
 
         private readonly Player _player;
         private readonly CauseOfDeath _causeOfDeath;
+
         public override Player GetPlayer()
         {
             return _player;
         }
 
+        /// <summary>
+        /// Gets the cause of death
+        /// </summary>
+        /// <returns>the cause of death</returns>
         public CauseOfDeath GetCauseOfDeath()
         {
             return _causeOfDeath;
@@ -210,6 +265,9 @@ namespace Splotch.Event.PlayerEvents
         }
     }
 
+    /// <summary>
+    /// Called when the simulation for a player updates
+    /// </summary>
     public class PlayerTickEvent : PlayerEvent
     {
         internal PlayerTickEvent(PlayerBody playerBody)
@@ -229,6 +287,10 @@ namespace Splotch.Event.PlayerEvents
             return _player;
         }
 
+        /// <summary>
+        /// Gets the PlayerBody object of the event
+        /// </summary>
+        /// <returns>The PlayerBodt object</returns>
         public PlayerBody GetPlayerBody()
         {
             return _playerBody;
