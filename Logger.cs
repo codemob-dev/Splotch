@@ -29,7 +29,6 @@ public static class Logger
             return "n/a";
             //Console.WriteLine("Unable to determine calling class.");
         }
-        return null;
     }
 
 

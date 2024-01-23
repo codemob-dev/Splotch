@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
+﻿using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Reflection;
 using System;
-using HarmonyLib;
 
 namespace Splotch.Loader.ModLoader
 {
