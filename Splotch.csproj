@@ -36,8 +36,12 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="Event.cs" />
     <Compile Include="GuiModifications.cs" />
     <Compile Include="HarmonyLoader.cs" />
     <Compile Include="Loader.cs" />

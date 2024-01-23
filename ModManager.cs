@@ -1,7 +1,5 @@
 ﻿using Splotch.Loader.ModLoader;
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Splotch
 {

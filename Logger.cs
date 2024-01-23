@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using UnityEngine;
@@ -29,7 +28,6 @@ public static class Logger
             return "n/a";
             //Console.WriteLine("Unable to determine calling class.");
         }
-        return null;
     }
 
 
