@@ -84,7 +84,7 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         public class ModEntrypointData
         {
-            public string DLL { get; set; }
+            public string Dll { get; set; }
             public string ClassName { get; set; }
         }
 
@@ -93,7 +93,7 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         public class ModAttributesData
         {
-            public string ID { get; set; }
+            public string Id { get; set; }
             public string Name { get; set; }
 
             public string Description { get; set; } = "";
@@ -107,7 +107,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(Entrypoint.DLL, Entrypoint.ClassName, Attributes.ID, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
+            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
         }
     }
 
