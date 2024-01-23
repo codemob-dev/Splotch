@@ -1,6 +1,9 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Diagnostics;
 using System.IO;
+using UnityEngine;
+
 
 public static class Logger
 {
@@ -10,7 +13,7 @@ public static class Logger
     /// what class A() is from
     /// </summary>
     /// <returns>The class that called your function</returns>
-    private static string getCallingClass()
+    private static string GetCallingClass()
     {
         // Basically its meant for errors but it also logs every function that is called!
         StackTrace stackTrace = new StackTrace();
@@ -28,10 +31,13 @@ public static class Logger
         }
     }
 
+
     /// <summary>
     /// Initializes the console.
+    /// 
+    /// CAN ONLY BE CALLED BY SPLOTCH
     /// </summary>
-    public static void InitLogger()
+    internal static void InitLogger()
     {
         // Create a new process
         Process process = new Process();
@@ -39,7 +45,7 @@ public static class Logger
         process.StartInfo.RedirectStandardInput = true;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = false;  // Set this to true if you want to hide the window (Might be how we disable the window)
+        process.StartInfo.CreateNoWindow = !Splotch.Config.LoadedSplotchConfig.consoleEnabled;  // Set this to true if you want to hide the window (Might be how we disable the window)
 
         // Start the process
         process.Start();
@@ -55,21 +61,67 @@ public static class Logger
         Console.SetOut(sw);
 
 
+        Application.logMessageReceived += HandleUnityLogs;
+
+
         Logger.Log("Log test");
         Logger.Warning("Warn test");
         Logger.Error("Error test");
+        Logger.Debug("Debug test");
 
 
         Logger.Log("Logging initialized.");
 
     }
+    private static string PrevMSG = "";
+    private static void HandleUnityLogs(string condition, string stackTrace, LogType type)
+    {
+        if (condition == PrevMSG)
+        {
+            return;
+        }
+        switch (type)
+        {
+            case LogType.Error:
+                Logger.Error(condition, true);
+                Logger.Error(stackTrace, true); 
+                break;
+            case LogType.Warning:
+                Logger.Warning(condition, true); 
+                break;
+            case LogType.Log:
+                Logger.Log(condition, true); 
+                break;
+            case LogType.Exception:
+                Logger.Error(condition, true);
+                Logger.Error(stackTrace, true); 
+                break;
+            case LogType.Assert:
+                Logger.Error(condition, true);
+                Logger.Error(stackTrace, true); 
+                break;
+        }
+    }
+
 
     /// <summary>
     /// Logs into console and output_log.txt
     /// </summary>
-    public static void Log(string message)
+    public static void Log(string message, bool doublestack = false)
     {
-        string formattedString = $"[INFO    : {getCallingClass()}] {message}";
+        string formattedString;
+        if (doublestack)
+        {
+
+            formattedString = $"[INFO    : Unity] {message}";
+        }
+        else
+        {
+            formattedString = $"[INFO    : {GetCallingClass()}] {message}";
+        }
+        //string formattedString = $"[INFO    : {GetCallingClass()}] {message}";
+
+        PrevMSG = formattedString;
 
         Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -80,9 +132,20 @@ public static class Logger
     /// <summary>
     /// Logs a warning into console and logs to output_log.txt
     /// </summary>
-    public static void Warning(string message)
+    public static void Warning(string message, bool doublestack = false)
     {
-        string formattedString = $"[WARNING : {getCallingClass()}] {message}";
+        string formattedString;
+        if (doublestack)
+        {
+
+            formattedString = $"[WARNING : Unity] {message}";
+        }
+        else
+        {
+            formattedString = $"[WARNING : {GetCallingClass()}] {message}";
+        }
+
+        PrevMSG = formattedString;
 
         Console.ForegroundColor = ConsoleColor.Yellow;
 
@@ -95,11 +158,56 @@ public static class Logger
     /// <summary>
     /// Logs an error into console and logs to output_log.txt
     /// </summary>
-    public static void Error(string message)
+    public static void Error(string message, bool doublestack = false)
     {
-        string formattedString = $"[ERROR   : {getCallingClass()}] {message}";
+        string formattedString;
+        if (doublestack)
+        {
+
+            formattedString = $"[ERROR   : Unity] {message}";
+        }
+        else
+        {
+            formattedString = $"[ERROR   : {GetCallingClass()}] {message}";
+        }
+        //string formattedString = $"[ERROR   : {GetCallingClass()}] {message}";
+
+        PrevMSG = formattedString;
 
         Console.ForegroundColor = ConsoleColor.Red;
+
+        Console.WriteLine(formattedString);
+        UnityEngine.Debug.LogError(formattedString);
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+    }
+
+    /// <summary>
+    /// Logs an debug message into console and logs to output_log.txt.
+    /// 
+    /// <c> VERBOSE LOGGING NEEDS TO BE ENABLED </c>
+    /// </summary>
+    public static void Debug(string message, bool doublestack = false)
+    {
+        if (!Splotch.Config.LoadedSplotchConfig.verboseLoggingEnabled)
+        {
+            return;
+        }
+
+        string formattedString;
+        if (doublestack)
+        {
+
+            formattedString = $"[DEBUG   : Unity] {message}";
+        }
+        else
+        {
+            formattedString = $"[DEBUG   : {GetCallingClass()}] {message}";
+        }
+
+        PrevMSG = formattedString;
+
+        Console.ForegroundColor = ConsoleColor.White;
 
         Console.WriteLine(formattedString);
         UnityEngine.Debug.LogError(formattedString);

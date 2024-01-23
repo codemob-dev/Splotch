@@ -77,15 +77,15 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     class DeserializedModInfo
     {
-        public ModEntrypointData entrypoint { get; set; }
-        public ModAttributesData attributes { get; set; }
+        public ModEntrypointData Entrypoint { get; set; }
+        public ModAttributesData Attributes { get; set; }
         /// <summary>
         /// An internal class for the <c>entrypoint</c> section of the <c>modinfo.yaml</c> file.
         /// </summary>
         public class ModEntrypointData
         {
-            public string dll { get; set; }
-            public string className { get; set; }
+            public string DLL { get; set; }
+            public string ClassName { get; set; }
         }
 
         /// <summary>
@@ -93,12 +93,12 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         public class ModAttributesData
         {
-            public string id { get; set; }
-            public string name { get; set; }
+            public string ID { get; set; }
+            public string Name { get; set; }
 
-            public string description { get; set; } = "";
-            public string version { get; set; } = "1.0";
-            public string[] authors { get; set; } = { };
+            public string Description { get; set; } = "";
+            public string Version { get; set; } = "1.0";
+            public string[] Authors { get; set; } = { };
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(entrypoint.dll, entrypoint.className, attributes.id, attributes.name, attributes.description, attributes.version, attributes.authors);
+            return new ModInfo(Entrypoint.DLL, Entrypoint.ClassName, Attributes.ID, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
         }
     }
 
