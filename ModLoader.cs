@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
+﻿using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Reflection;
 using System;
-using HarmonyLib;
 
 namespace Splotch.Loader.ModLoader
 {
@@ -20,7 +17,7 @@ namespace Splotch.Loader.ModLoader
         /// <summary>
         /// Called by the <c>Loader</c>, loads all detected mods and logs any issues encountered during loading.
         /// </summary>
-        internal static void loadMods()
+        internal static void LoadMods()
         {
             Logger.Log("Starting to load mods...");
             int modCountLoaded = 0;
@@ -44,7 +41,7 @@ namespace Splotch.Loader.ModLoader
                             data = deserializedData.ToModInfo();
                         }
 
-                        bool loadSuccess = data.loadMod(modFolderPath);
+                        bool loadSuccess = data.LoadMod(modFolderPath);
                         if (loadSuccess)
                         {
                             Logger.Log($"{data} loaded");
@@ -144,7 +141,7 @@ namespace Splotch.Loader.ModLoader
         /// </summary>
         /// <param name="modFolder">The folder the mod is contained in.</param>
         /// <returns><c>true</c> if the loading was successful and <c>false</c> if there was an error.</returns>
-        internal bool loadMod(string modFolder)
+        internal bool LoadMod(string modFolder)
         {
             try
             {

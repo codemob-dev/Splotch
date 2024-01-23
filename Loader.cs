@@ -1,5 +1,5 @@
 ﻿using UnityEngine.SceneManagement;
-using Splotch;
+using Splotch.Event;
 
 namespace Splotch.Loader
 {
@@ -25,7 +25,8 @@ namespace Splotch.Loader
 
             enteredScene = true;
             Patcher.DoPatching();
-            ModLoader.ModLoader.loadMods();
+            ModLoader.ModLoader.LoadMods();
+            EventManager.Load();
         }
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace Splotch.Loader
             // Execute patching after unity has finished it's startup and loaded at least the first game scene
             if (!enteredScene)
                 OnEnterScene(scene, loadSceneMode);
+
             if (scene.name == "MainMenu")
                 BaseGuiModifications.RunMainMenuModifications();
         }
