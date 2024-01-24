@@ -40,7 +40,7 @@ namespace Splotch.Loader
             // set the text to the version info
             AssemblyName name = Assembly.GetExecutingAssembly().GetName();
 
-            textComponent.text = $"{ModManager.GetLoadedModsInfoText()}\n{name.Name} version {name.Version}";
+            textComponent.text = $"{ModManager.GetLoadedModsInfoText()}\n{name.Name} version {VersionChecker.currentVersionString}";
 
             // change settings
             textComponent.font = LocalizedText.localizationTable.GetFont(Settings.Get().Language, false);
