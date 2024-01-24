@@ -14,12 +14,12 @@ namespace Splotch.Loader
 
             try
             {
-                RetrieveVersionInfo();
-                Version targetVersion = new Version((Config.LoadedSplotchConfig.nightly ? nightly : version) + ".0");
-                updateNeeded = targetVersion > currentVersion;
+            RetrieveVersionInfo();
+            Version targetVersion = new Version((Config.LoadedSplotchConfig.nightly ? nightly : version) + ".0");
+            updateNeeded = targetVersion > currentVersion;
 
-                targetVersionString = targetVersion.ToString();
-                targetVersionString = targetVersionString.Remove(targetVersionString.Length - 2);
+            targetVersionString = targetVersion.ToString();
+            targetVersionString = targetVersionString.Remove(targetVersionString.Length - 2);
             } catch (Exception) { }
         }
 
@@ -35,7 +35,7 @@ namespace Splotch.Loader
             string result;
             using (WebClient client = new WebClient())
                 result = client.DownloadString("https://raw.githubusercontent.com/commandblox/Splotch/master/version");
-            
+
             string[] lines = result.Replace("\n\r", "\n").Replace("\r\n", "\n").Split('\n');
             version = lines[0].Split('=')[1];
             nightly = lines[1].Split('=')[1];
