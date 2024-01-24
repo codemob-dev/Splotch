@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Splotch.Loader;
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using UnityEngine;
 
 
@@ -38,30 +42,47 @@ public static class Logger
     /// </summary>
     internal static void InitLogger()
     {
+        VersionChecker.RunVersionChecker();
+
         // Create a new process
         Process process = new Process();
         process.StartInfo.FileName = "cmd.exe";
         process.StartInfo.RedirectStandardInput = true;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = !Splotch.Config.LoadedSplotchConfig.consoleEnabled;  // Set this to true if you want to hide the window (Might be how we disable the window)
+        process.StartInfo.CreateNoWindow = !Splotch.Config.LoadedSplotchConfig.consoleEnabled && !VersionChecker.updateNeeded;  // Set this to true if you want to hide the window (Might be how we disable the window)
 
         // Start the process
         process.Start();
-        // It breaks if this isn't here.
-        System.Threading.Thread.Sleep(1000);
+
+        // It breaks if this isn't here
+        Thread.Sleep(1000);
 
         // Connects the console window to bopl
         AttachConsole((uint) process.Id);
 
         // Sets the output to the console window thing
-        StreamWriter sw = new StreamWriter(Console.OpenStandardOutput());
-        sw.AutoFlush = true;
+        StreamWriter sw = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
         Console.SetOut(sw);
 
+        // Set the title of the window
+        Console.Title = $"Splotch Log version {VersionChecker.currentVersionString}";
 
         Application.logMessageReceived += HandleUnityLogs;
 
+        if (VersionChecker.updateNeeded)
+        {
+            Console.WriteLine($"Update {VersionChecker.targetVersionString} needed! The current installed version is {VersionChecker.currentVersionString} Press [P] to open the download page or any other key to continue");
+
+            ConsoleKeyInfo key = Console.ReadKey();
+            if (key.KeyChar == 'p')
+            {
+                Process.Start("https://github.com/commandblox/Splotch/releases");
+            }
+
+            if (!Splotch.Config.LoadedSplotchConfig.consoleEnabled)
+                process.Close();
+        }
 
         Logger.Log("Log test");
         Logger.Warning("Warn test");
@@ -215,6 +236,6 @@ public static class Logger
     }
 
     // AttachConsole lets me "hook" the logger into the thing
-    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    [DllImport("kernel32.dll")]
     private static extern bool AttachConsole(uint dwProcessId);
 }

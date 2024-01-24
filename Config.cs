@@ -17,6 +17,7 @@ namespace Splotch
             public bool splotchEnabled;
             public bool consoleEnabled;
             public bool verboseLoggingEnabled;
+            public bool nightly; // I touched it (;
         }
 
         internal static SplotchConfigStruct LoadedSplotchConfig = new SplotchConfigStruct
@@ -24,6 +25,7 @@ namespace Splotch
             splotchEnabled = true,
             consoleEnabled = true,
             verboseLoggingEnabled = true,
+            nightly = false,
         };
 
         internal struct SplotchConfigCont

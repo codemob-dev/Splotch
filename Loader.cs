@@ -31,9 +31,7 @@ namespace Splotch.Loader
         {
             Logger.InitLogger();
 
-            AssemblyName name = Assembly.GetExecutingAssembly().GetName();
-            Logger.Log($"Entering main menu on version {name.Version}");
-
+            Logger.Log($"Entering main menu on version {VersionChecker.currentVersionString}");
 
             enteredScene = true;
             Patcher.DoPatching();

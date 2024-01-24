@@ -14,6 +14,10 @@ namespace Splotch.Event
     public static class EventManager
     {
         public static Dictionary<Type, List<MethodInfo>> registeredEventHandlers = new Dictionary<Type, List<MethodInfo>>();
+        /// <summary>
+        /// Registers a static event listener class containing functions tagged with <c>[EventHandler]</c>
+        /// </summary>
+        /// <param name="eventListener">The class</param>
         public static void RegisterEventListener(Type eventListener)
         {
             foreach (MethodInfo eventHandler in eventListener.GetMethods())
