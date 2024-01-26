@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Splotch.Event.GameEvents;
 using Splotch.Loader;
 using System;
 using System.Collections.Generic;
@@ -127,9 +128,9 @@ namespace Splotch.Event
     /// <summary>
     /// An event that can be cancelled
     /// </summary>
-    public abstract class CancellableEvent : Event
+    public interface Cancellable
     {
-        public bool Cancelled { get; set; } = false;
+        bool Cancelled { get; set; }
     }
 
     /// <summary>
@@ -144,8 +145,9 @@ namespace Splotch.Event.AbilityEvents
     /// <summary>
     /// A class that should be extended by any ability-related events
     /// </summary>
-    public abstract class AbilityEvent : CancellableEvent
+    public abstract class AbilityEvent : Event, Cancellable
     {
+        public bool Cancelled { get; set; } = false;
 
         /// <summary>
         /// Gets the ability related to the event
@@ -225,13 +227,24 @@ namespace Splotch.Event.PlayerEvents
     /// <summary>
     /// A class that should be extended by any player-related events
     /// </summary>
-    public abstract class PlayerEvent : Event
+    public abstract class PlayerEvent : GameEvent
     {
         /// <summary>
         /// Retrieves the player related to the event
         /// </summary>
         /// <returns></returns>
         public abstract Player GetPlayer();
+        public override GameSessionHandler GetGameSessionHandler()
+        {
+            Player player = GetPlayer();
+            FieldInfo selfRefField = typeof(GameSessionHandler).GetField("selfRef", BindingFlags.Static | BindingFlags.NonPublic);
+            return selfRefField.GetValue(null) as GameSessionHandler;
+        }
+
+        public SlimeController GetSlimeController()
+        {
+            return GetSlimeControllers()[GetPlayer().Id - 1];
+        }
     }
 
     public class PlayerDeathEvent : PlayerEvent
@@ -306,6 +319,22 @@ namespace Splotch.Event.PlayerEvents
         {
             PlayerTickEvent e = new PlayerTickEvent(__instance);
             RunHandlers(e);
+        }
+    }
+
+}
+
+namespace Splotch.Event.GameEvents
+{
+    public abstract class GameEvent : Event, Cancellable
+    {
+        public bool Cancelled { get; set; } = false;
+
+        public abstract GameSessionHandler GetGameSessionHandler();
+        public SlimeController[] GetSlimeControllers()
+        {
+            FieldInfo slimeControllersField = typeof(GameSessionHandler).GetField("slimeControllers", BindingFlags.Instance | BindingFlags.NonPublic);
+            return slimeControllersField.GetValue(GetGameSessionHandler()) as SlimeController[];
         }
     }
 }

@@ -125,6 +125,7 @@ namespace Splotch.Loader.ModLoader
         public string[] authors;
 
         public SplotchMod splotchMod;
+        public Assembly assembly;
         internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors)
         {
             this.dll = dll;
@@ -146,8 +147,16 @@ namespace Splotch.Loader.ModLoader
             try
             {
                 string dllAbsolutePath = Path.Combine(modFolder, dll);
-                Assembly assembly = Assembly.LoadFile(dllAbsolutePath);
+                Logger.Debug($"Loading {dllAbsolutePath}");
+                assembly = Assembly.LoadFile(dllAbsolutePath);
+                Logger.Debug($"Loaded {assembly}");
                 Type assemblyEntrypoint = assembly.GetType(className);
+                if (assemblyEntrypoint == null)
+                {
+                    Logger.Error($"{className} is not a valid class! Valid classes are: {string.Join<Type>(", ", assembly.GetTypes())}, if this is wrong, try changing the name of your assembly (your dll)");
+                    return false;
+                }
+
                 if (assemblyEntrypoint.BaseType == typeof(SplotchMod))
                 {
                     splotchMod = (SplotchMod)Activator.CreateInstance(assemblyEntrypoint);
