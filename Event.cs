@@ -151,7 +151,7 @@ namespace Splotch.Event.AbilityEvents
     /// <summary>
     /// A class that should be extended by any ability-related events
     /// </summary>
-    public abstract class AbilityEvent : Event, Cancellable
+    public abstract class AbilityEvent : GameEvent, Cancellable
     {
         public bool Cancelled { get; set; } = false;
 
@@ -240,15 +240,10 @@ namespace Splotch.Event.PlayerEvents
         /// </summary>
         /// <returns></returns>
         public abstract Player GetPlayer();
-        public override GameSessionHandler GetGameSessionHandler()
-        {
-            FieldInfo selfRefField = typeof(GameSessionHandler).GetField("selfRef", BindingFlags.Static | BindingFlags.NonPublic);
-            return selfRefField.GetValue(null) as GameSessionHandler;
-        }
 
         public SlimeController GetSlimeController()
         {
-            return GetSlimeControllers()[GetPlayer().Id - 1];
+            return Splotch.GetSlimeControllers()[GetPlayer().Id - 1];
         }
     }
 
@@ -335,11 +330,5 @@ namespace Splotch.Event.GameEvents
     {
         public bool Cancelled { get; set; } = false;
 
-        public abstract GameSessionHandler GetGameSessionHandler();
-        public SlimeController[] GetSlimeControllers()
-        {
-            FieldInfo slimeControllersField = typeof(GameSessionHandler).GetField("slimeControllers", BindingFlags.Instance | BindingFlags.NonPublic);
-            return slimeControllersField.GetValue(GetGameSessionHandler()) as SlimeController[];
-        }
     }
 }
