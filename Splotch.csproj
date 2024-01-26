@@ -49,6 +49,7 @@
     <Compile Include="ModLoader.cs" />
     <Compile Include="ModManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Splotch.cs" />
     <Compile Include="SplotchMod.cs" />
     <Compile Include="VersionChecker.cs" />
   </ItemGroup>

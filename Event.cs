@@ -45,21 +45,21 @@ namespace Splotch.Event
                                 }
                                 registeredEventHandlers[eventType].Add(eventHandler);
 
-                                Logger.Debug($"Successfully registered event handler \"{eventHandler.Name}\"!");
+                                Logger.Debug($"Successfully registered event handler \"{eventHandler.FullDescription()}\"!");
                             }
                             else
                             {
-                                Logger.Error($"Could not register event handler \"{eventHandler.Name}\" as the argument \"{eventType} {eventHandlerArguments[0].Name}\" does not extend \"{nameof(Event)}\"!");
+                                Logger.Error($"Could not register event handler \"{eventHandler.FullDescription()}\" as the argument \"{eventType} {eventHandlerArguments[0].Name}\" does not extend \"{nameof(Event)}\"!");
                             }
                         }
                         else
                         {
-                            Logger.Error($"Could not register event handler \"{eventHandler.Name}\" as it has {eventHandlerArguments.Length} arguments, not 1!");
+                            Logger.Error($"Could not register event handler \"{eventHandler.FullDescription()}\" as it has {eventHandlerArguments.Length} arguments, not 1!");
                         }
                     }
                     else
                     {
-                        Logger.Error($"Could not register event handler \"{eventHandler.Name}\" as it is not static!");
+                        Logger.Error($"Could not register event handler \"{eventHandler.FullDescription()}\" as it is not static!");
                     }
                 }
             }
@@ -119,7 +119,13 @@ namespace Splotch.Event
             {
                 foreach (MethodInfo method in EventManager.registeredEventHandlers[e.GetType()])
                 {
-                    method.Invoke(null, new object[] { e });
+                    try
+                    {
+                        method.Invoke(null, new object[] { e });
+                    } catch(Exception ex)
+                    {
+                        Logger.Error($"An error occurred while running the event handler {method.FullDescription()}:\n{ex.Message}\n{ex.StackTrace}");
+                    }
                 }
             }
         }
@@ -236,7 +242,6 @@ namespace Splotch.Event.PlayerEvents
         public abstract Player GetPlayer();
         public override GameSessionHandler GetGameSessionHandler()
         {
-            Player player = GetPlayer();
             FieldInfo selfRefField = typeof(GameSessionHandler).GetField("selfRef", BindingFlags.Static | BindingFlags.NonPublic);
             return selfRefField.GetValue(null) as GameSessionHandler;
         }
