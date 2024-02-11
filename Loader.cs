@@ -1,6 +1,10 @@
 using UnityEngine.SceneManagement;
 using System.Reflection;
 using Splotch.Event;
+using Splotch;
+using UnityEngine;
+using System;
+using System.Diagnostics;
 
 namespace Splotch.Loader
 {
@@ -15,9 +19,6 @@ namespace Splotch.Loader
             public string modName;
             public int someValue;
         }
-
-
-
 
         public static bool enteredScene = false;
 
@@ -37,6 +38,8 @@ namespace Splotch.Loader
             Patcher.DoPatching();
             ModLoader.ModLoader.LoadMods();
             EventManager.Load();
+
+            GameObject obj = new GameObject("Unloader", new Type[] { typeof(UnLoader) });
         }
 
         /// <summary>
@@ -44,14 +47,20 @@ namespace Splotch.Loader
         /// </summary>
         public static void Main()
         {
-            Splotch.Config.CreateConfigAndLoadSplotchConfig();
+            Config.CreateConfigAndLoadSplotchConfig();
 
             if (!Config.LoadedSplotchConfig.splotchEnabled) 
-            {
                 return;
-            }
 
             SceneManager.sceneLoaded += SceneLoaded;
+
+            
+        }
+
+        internal static void GameExit()
+        {
+            ModLoader.ModLoader.UnloadMods();
+            Logger.Log("Finished unloading!");
         }
 
         /// <summary>
@@ -67,6 +76,26 @@ namespace Splotch.Loader
 
             if (scene.name == "MainMenu")
                 BaseGuiModifications.RunMainMenuModifications();
+        }
+    }
+
+    class UnLoader : MonoBehaviour
+    {
+        public static UnLoader Instance
+        {
+            get;
+            set;
+        }
+
+        void Awake()
+        {
+            DontDestroyOnLoad(transform.gameObject);
+            Instance = this;
+        }
+
+        public void OnApplicationQuit()
+        {
+            Loader.GameExit();
         }
     }
 }

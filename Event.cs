@@ -243,7 +243,7 @@ namespace Splotch.Event.PlayerEvents
 
         public SlimeController GetSlimeController()
         {
-            return Splotch.GetSlimeControllers()[GetPlayer().Id - 1];
+            return SplotchUtils.GetSlimeControllers()[GetPlayer().Id - 1];
         }
     }
 
@@ -307,7 +307,7 @@ namespace Splotch.Event.PlayerEvents
         /// <summary>
         /// Gets the PlayerBody object of the event
         /// </summary>
-        /// <returns>The PlayerBodt object</returns>
+        /// <returns>The PlayerBody object</returns>
         public PlayerBody GetPlayerBody()
         {
             return _playerBody;
@@ -326,9 +326,8 @@ namespace Splotch.Event.PlayerEvents
 
 namespace Splotch.Event.GameEvents
 {
-    public abstract class GameEvent : Event, Cancellable
+    public abstract class GameEvent : Event
     {
-        public bool Cancelled { get; set; } = false;
 
     }
 }

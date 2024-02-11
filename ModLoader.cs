@@ -3,6 +3,9 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Reflection;
 using System;
+using HarmonyLib;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace Splotch.Loader.ModLoader
 {
@@ -11,19 +14,39 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     internal static class ModLoader
     {
-        const string MOD_FOLDER_PATH = "splotch_mods";
-        const string MOD_INFO_FILE_NAME = "modinfo.yaml";
+        static readonly string MOD_FOLDER_PATH          = "splotch_mods";
+        static readonly string MOD_INFO_FILE_NAME       = "modinfo.yaml";
+        static readonly string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp";
+
         public static DirectoryInfo modFolderDirectory;
+        public static DirectoryInfo modFolderTempDirectory;
         /// <summary>
         /// Called by the <c>Loader</c>, loads all detected mods and logs any issues encountered during loading.
         /// </summary>
         internal static void LoadMods()
         {
             Logger.Log("Starting to load mods...");
-            int modCountLoaded = 0;
-            int modCountTot = 0;
-            modFolderDirectory = Directory.CreateDirectory(MOD_FOLDER_PATH);
-            foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories())
+            int modCountLoaded     = 0;
+            int modCountTot        = 0;
+            modFolderDirectory     = Directory.CreateDirectory(MOD_FOLDER_PATH);
+            modFolderTempDirectory = Directory.CreateDirectory(UNZIPPED_MOD_TEMP_FOLDER);
+
+            ZipConstants.DefaultCodePage = System.Text.Encoding.UTF8.CodePage;
+            foreach (FileInfo modZipFile in modFolderDirectory.GetFiles())
+            {
+                if (modZipFile.Extension.ToLower() == ".zip")
+                {
+                    Logger.Debug($"Unzipped mod {modZipFile.Name} detected!");
+
+                    FastZip fastZip = new FastZip();
+                    fastZip.ExtractZip(modZipFile.FullName, modFolderTempDirectory.CreateSubdirectory(
+                        Path.GetFileNameWithoutExtension(modZipFile.Name)
+                        ).FullName, null);
+                }
+            }
+
+
+            foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories().AddRangeToArray(modFolderTempDirectory.GetDirectories()))
             {
                 modCountTot++;
                 string modFolderPath = modFolder.FullName;
@@ -69,6 +92,37 @@ namespace Splotch.Loader.ModLoader
             }
 
             Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
+        }
+
+        public static void RecursiveDelete(DirectoryInfo baseDir)
+        {
+            if (!baseDir.Exists)
+                return;
+
+            foreach (var dir in baseDir.EnumerateDirectories())
+            {
+                RecursiveDelete(dir);
+            }
+            var files = baseDir.GetFiles();
+            foreach (var file in files)
+            {
+                file.IsReadOnly = false;
+                File.SetAttributes(file.FullName, FileAttributes.Normal);
+                file.Delete();
+            }
+            baseDir.Delete();
+        }
+
+        internal static void UnloadMods()
+        {
+            Logger.Log("Unloading mods...");
+            foreach (var loadedMod in ModManager.loadedMods)
+            {
+                loadedMod.splotchMod.OnUnload();
+                Logger.Debug($"Unloaded {loadedMod.name}");
+            }
+            Logger.Debug("Clearing temp...");
+            RecursiveDelete(modFolderTempDirectory);
         }
     }
 
@@ -148,7 +202,9 @@ namespace Splotch.Loader.ModLoader
             {
                 string dllAbsolutePath = Path.Combine(modFolder, dll);
                 Logger.Debug($"Loading {dllAbsolutePath}");
-                assembly = Assembly.LoadFile(dllAbsolutePath);
+
+                assembly = Assembly.Load(File.ReadAllBytes(dllAbsolutePath));
+
                 Logger.Debug($"Loaded {assembly}");
                 Type assemblyEntrypoint = assembly.GetType(className);
                 if (assemblyEntrypoint == null)
