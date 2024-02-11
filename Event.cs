@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Splotch.Event.GameEvents;
 using Splotch.Loader;
 using System;
 using System.Collections.Generic;
@@ -44,21 +45,21 @@ namespace Splotch.Event
                                 }
                                 registeredEventHandlers[eventType].Add(eventHandler);
 
-                                Logger.Debug($"Successfully registered event handler \"{eventHandler.Name}\"!");
+                                Logger.Debug($"Successfully registered event handler \"{eventHandler.FullDescription()}\"!");
                             }
                             else
                             {
-                                Logger.Error($"Could not register event handler \"{eventHandler.Name}\" as the argument \"{eventType} {eventHandlerArguments[0].Name}\" does not extend \"{nameof(Event)}\"!");
+                                Logger.Error($"Could not register event handler \"{eventHandler.FullDescription()}\" as the argument \"{eventType} {eventHandlerArguments[0].Name}\" does not extend \"{nameof(Event)}\"!");
                             }
                         }
                         else
                         {
-                            Logger.Error($"Could not register event handler \"{eventHandler.Name}\" as it has {eventHandlerArguments.Length} arguments, not 1!");
+                            Logger.Error($"Could not register event handler \"{eventHandler.FullDescription()}\" as it has {eventHandlerArguments.Length} arguments, not 1!");
                         }
                     }
                     else
                     {
-                        Logger.Error($"Could not register event handler \"{eventHandler.Name}\" as it is not static!");
+                        Logger.Error($"Could not register event handler \"{eventHandler.FullDescription()}\" as it is not static!");
                     }
                 }
             }
@@ -118,7 +119,13 @@ namespace Splotch.Event
             {
                 foreach (MethodInfo method in EventManager.registeredEventHandlers[e.GetType()])
                 {
-                    method.Invoke(null, new object[] { e });
+                    try
+                    {
+                        method.Invoke(null, new object[] { e });
+                    } catch(Exception ex)
+                    {
+                        Logger.Error($"An error occurred while running the event handler {method.FullDescription()}:\n{ex.Message}\n{ex.StackTrace}");
+                    }
                 }
             }
         }
@@ -127,9 +134,9 @@ namespace Splotch.Event
     /// <summary>
     /// An event that can be cancelled
     /// </summary>
-    public abstract class CancellableEvent : Event
+    public interface Cancellable
     {
-        public bool Cancelled { get; set; } = false;
+        bool Cancelled { get; set; }
     }
 
     /// <summary>
@@ -144,8 +151,9 @@ namespace Splotch.Event.AbilityEvents
     /// <summary>
     /// A class that should be extended by any ability-related events
     /// </summary>
-    public abstract class AbilityEvent : CancellableEvent
+    public abstract class AbilityEvent : GameEvent, Cancellable
     {
+        public bool Cancelled { get; set; } = false;
 
         /// <summary>
         /// Gets the ability related to the event
@@ -225,13 +233,18 @@ namespace Splotch.Event.PlayerEvents
     /// <summary>
     /// A class that should be extended by any player-related events
     /// </summary>
-    public abstract class PlayerEvent : Event
+    public abstract class PlayerEvent : GameEvent
     {
         /// <summary>
         /// Retrieves the player related to the event
         /// </summary>
         /// <returns></returns>
         public abstract Player GetPlayer();
+
+        public SlimeController GetSlimeController()
+        {
+            return SplotchUtils.GetSlimeControllers()[GetPlayer().Id - 1];
+        }
     }
 
     public class PlayerDeathEvent : PlayerEvent
@@ -294,7 +307,7 @@ namespace Splotch.Event.PlayerEvents
         /// <summary>
         /// Gets the PlayerBody object of the event
         /// </summary>
-        /// <returns>The PlayerBodt object</returns>
+        /// <returns>The PlayerBody object</returns>
         public PlayerBody GetPlayerBody()
         {
             return _playerBody;
@@ -307,5 +320,14 @@ namespace Splotch.Event.PlayerEvents
             PlayerTickEvent e = new PlayerTickEvent(__instance);
             RunHandlers(e);
         }
+    }
+
+}
+
+namespace Splotch.Event.GameEvents
+{
+    public abstract class GameEvent : Event
+    {
+
     }
 }

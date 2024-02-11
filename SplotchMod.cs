@@ -21,5 +21,9 @@ namespace Splotch
         /// Runs as soon as the mod is loaded after Splotch is done loading.
         /// </summary>
         public abstract void OnLoad();
+        public void OnUnload()
+        {
+
+        }
     }
 }
