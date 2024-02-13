@@ -25,3 +25,4 @@ Clone my [template mod](https://github.com/commandblox/Splotch-Mod-Template) to 
  - Other features
    - [x] A general utility class
    - [ ] BepInEx compatibility (in progress)
+ - [ ] Built-in mod manager
