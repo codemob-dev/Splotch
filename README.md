@@ -2,6 +2,9 @@
 
 ![Total lines of code in master :)](https://tokei.rs/b1/github/commandblox/splotch?category=lines)
 ![GitHub repo size](https://img.shields.io/github/repo-size/commandblox/Splotch?style=plastic)
+![GitHub Release](https://img.shields.io/github/v/release/commandblox/Splotch?label=Latest%20Release)
+
+
 
 Splotch is a mod loader for the game Bopl Battle. It runs on [Doorstop](https://github.com/NeighTools/UnityDoorstop) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
 
