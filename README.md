@@ -9,3 +9,17 @@ Extract the [latest release](https://github.com/commandblox/Splotch/releases/lat
 
 ## Mod creation
 Clone my [template mod](https://github.com/commandblox/Splotch-Mod-Template) to get started. More info on the [wiki](https://github.com/commandblox/Splotch/wiki/Mod-Development).
+
+## Roadmap
+ - Mod loading
+   - [x] Basic functionality
+   - [x] Loading from zip files
+   - [ ] Mod dependencies
+ - APIs
+   - [x] Event API (More events are needed)
+   - [ ] BGL (Bopl Graphics Lib) (in progress)
+   - [ ] Ability API (in progress)
+   - [ ] Networking Lib
+ - Other features
+   - [x] A general utility class
+   - [ ] BepInEx compatibility (in progress)
