@@ -17,7 +17,7 @@ namespace Splotch
             public bool splotchEnabled;
             public bool consoleEnabled;
             public bool verboseLoggingEnabled;
-            public bool nightly; // I touched it (;
+            public bool nightly;
         }
 
         internal static SplotchConfigStruct LoadedSplotchConfig = new SplotchConfigStruct
@@ -82,7 +82,6 @@ namespace Splotch
             }
             else
             {
-
                 try {
 
                     using (StreamReader reader = new StreamReader("splotch_config/splotchconfig.yaml"))

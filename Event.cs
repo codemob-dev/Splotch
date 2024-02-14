@@ -70,11 +70,16 @@ namespace Splotch.Event
         /// </summary>
         internal static void PatchEventTypes()
         {
-            // retrieve all types that extend Event
-            Type[] eventExtensions = AppDomain.CurrentDomain.GetAssemblies()
-               .SelectMany(domainAssembly => domainAssembly.GetTypes())
-               .Where(type => type.IsSubclassOf(typeof(Event))
-               ).ToArray();
+            Logger.Debug("Looking for events...");
+
+            IEnumerable<Type> eventExtensions = new List<Type>();             //
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) // 
+                if (!assembly.GetName().Name.StartsWith("BepInEx."))          // mm spaghetti
+                    foreach (var type in assembly.ExportedTypes)              // it works so don't mess with it
+                        if (type.IsSubclassOf(typeof(Event)))                 //
+                            eventExtensions.Append(type);                     //
+
+            Logger.Debug($"Found {eventExtensions.Count()} events!");
 
             // run all patches on Event extensions
             foreach (Type eventExtension in eventExtensions) { 
@@ -93,6 +98,7 @@ namespace Splotch.Event
         internal static void Load()
         {
             PatchEventTypes();
+            Logger.Debug("Loaded events!");
         }
     }
 
