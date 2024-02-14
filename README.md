@@ -1,6 +1,8 @@
 # Splotch
 
 ![Total lines of code in master :)](https://tokei.rs/b1/github/commandblox/splotch?category=lines)
+![GitHub repo size](https://img.shields.io/github/repo-size/commandblox/Splotch?style=plastic)
+![GitHub Release](https://img.shields.io/github/v/release/commandblox/Splotch?style=plastic&label=latest%20release)
 
 Splotch is a mod loader for the game Bopl Battle. It runs on [Doorstop](https://github.com/NeighTools/UnityDoorstop) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
 
@@ -9,3 +11,18 @@ Extract the [latest release](https://github.com/commandblox/Splotch/releases/lat
 
 ## Mod creation
 Clone my [template mod](https://github.com/commandblox/Splotch-Mod-Template) to get started. More info on the [wiki](https://github.com/commandblox/Splotch/wiki/Mod-Development).
+
+## Roadmap
+ - Mod loading
+   - [x] Basic functionality
+   - [x] Loading from zip files
+   - [ ] Mod dependencies
+ - APIs
+   - [x] Event API (More events are needed)
+   - [ ] BGL (Bopl Graphics Lib) (in progress)
+   - [ ] Ability API (in progress)
+   - [ ] Networking Lib
+ - Other features
+   - [x] A general utility class
+   - [ ] BepInEx compatibility (in progress)
+ - [ ] Built-in mod manager
