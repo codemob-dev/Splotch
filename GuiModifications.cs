@@ -2,6 +2,9 @@
 using TMPro;
 using System.Reflection;
 using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace Splotch.Loader
 {
@@ -40,7 +43,7 @@ namespace Splotch.Loader
             // set the text to the version info
             AssemblyName name = Assembly.GetExecutingAssembly().GetName();
 
-            textComponent.text = $"{ModManager.GetLoadedModsInfoText()}\n{name.Name} version {VersionChecker.currentVersionString}";
+            textComponent.text = $"{ModManager.GetLoadedModsInfoText()}\n{GetBepInExInfo()}\n{name.Name} version {VersionChecker.currentVersionString}";
 
             // change settings
             textComponent.font = LocalizedText.localizationTable.GetFont(Settings.Get().Language, false);
@@ -59,6 +62,33 @@ namespace Splotch.Loader
             rectTransform.pivot     = new Vector2(1, 0);
             rectTransform.sizeDelta = new Vector2(1200, 0);
             rectTransform.anchoredPosition = new Vector2(-10, 30);
+        }
+
+        internal static string GetBepInExInfo()
+        {
+            string text = "";
+            if (Loader.BepInExPresent)
+            {
+                Type chainloader = Assembly.LoadFrom(@"BepInEx\core\BepInEx.dll").GetType("BepInEx.Bootstrap.Chainloader");
+                IEnumerable pluginInfos = (IEnumerable)chainloader.GetProperty("PluginInfos", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+                foreach ( var pluginInfoKeyValue in pluginInfos )
+                {
+                    var pluginInfo = pluginInfoKeyValue.GetType().GetProperty("Value").GetValue(pluginInfoKeyValue);
+
+                    var metadataProperty = pluginInfo.GetType().GetProperty("Metadata");
+                    var pluginMetadata  = metadataProperty.GetValue(pluginInfo);
+
+                    var nameProperty    = pluginMetadata.GetType().GetProperty("Name");
+                    var versionProperty = pluginMetadata.GetType().GetProperty("Version");
+
+                    string name     = nameProperty.GetValue(pluginMetadata) as string;
+                    Version version = versionProperty.GetValue(pluginMetadata) as Version;
+
+                    text += $"{name} version {version} (BepInEx plugin)\n";
+                }
+                text += $"BepInEx version {Assembly.LoadFrom(@"BepInEx\core\BepInEx.dll").GetName().Version}";
+            }
+            return text;
         }
     }
 }

@@ -203,7 +203,7 @@ namespace Splotch.Loader.ModLoader
                 string dllAbsolutePath = Path.Combine(modFolder, dll);
                 Logger.Debug($"Loading {dllAbsolutePath}");
 
-                assembly = Assembly.Load(File.ReadAllBytes(dllAbsolutePath));
+                assembly = Assembly.LoadFrom(dllAbsolutePath);
 
                 Logger.Debug($"Loaded {assembly}");
                 Type assemblyEntrypoint = assembly.GetType(className);

@@ -4,7 +4,12 @@ using Splotch.Event;
 using Splotch;
 using UnityEngine;
 using System;
-using System.Diagnostics;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections;
+using HarmonyLib;
+using MonoMod.Utils;
 
 namespace Splotch.Loader
 {
@@ -13,6 +18,7 @@ namespace Splotch.Loader
     /// </summary>
     public static class Loader
     {
+        public static bool BepInExPresent { get { return Directory.Exists(@"BepInEx\core\"); } }
 
         struct SplotchConfigContainer
         {
@@ -40,6 +46,30 @@ namespace Splotch.Loader
             EventManager.Load();
 
             GameObject obj = new GameObject("Unloader", new Type[] { typeof(UnLoader) });
+            Logger.Debug("Finished main menu loading!");
+        }
+
+        public static void LoadBepInEx()
+        {
+            string path = @"BepInEx\core\BepInEx.Preloader.dll";
+
+
+            // Trick BepInEx to think it was invoked with doorstop
+            string actualInvokePath = Environment.GetEnvironmentVariable("DOORSTOP_INVOKE_DLL_PATH");
+            Environment.SetEnvironmentVariable("DOORSTOP_INVOKE_DLL_PATH", Path.Combine(Directory.GetCurrentDirectory(), path));
+
+
+            Assembly bepInExPreloader = Assembly.LoadFrom(path);
+
+            if (bepInExPreloader != null)
+            {
+                MethodInfo entrypointMethod = bepInExPreloader.GetType("BepInEx.Preloader.Entrypoint", true)
+                    .GetMethod("Main");
+
+                entrypointMethod.Invoke(null, null);
+            }
+
+            Environment.SetEnvironmentVariable("DOORSTOP_INVOKE_DLL_PATH", actualInvokePath);
         }
 
         /// <summary>
@@ -47,14 +77,19 @@ namespace Splotch.Loader
         /// </summary>
         public static void Main()
         {
+            if (BepInExPresent)
+                LoadBepInEx();
+
             Config.CreateConfigAndLoadSplotchConfig();
 
             if (!Config.LoadedSplotchConfig.splotchEnabled) 
                 return;
 
-            SceneManager.sceneLoaded += SceneLoaded;
-
-            
+            // BepInEx does some shenanigans with assembly loading so by using reflection to run unity
+            // methods we can avoid loading assemblies before bepinex
+            typeof(Loader).Assembly.GetType($"Splotch.Loader.BepInExLoader")
+                .GetMethod(nameof(BepInExLoader.LoadBepInExUnstable))
+                .Invoke(null, null);
         }
 
         internal static void GameExit()
@@ -68,7 +103,7 @@ namespace Splotch.Loader
         /// </summary>
         /// <param name="scene">The scene to be loaded</param>
         /// <param name="loadSceneMode">The scene mode</param>
-        private static void SceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+        public static void SceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
             // Execute patching after unity has finished it's startup and loaded at least the first game scene
             if (!enteredScene)
@@ -96,6 +131,14 @@ namespace Splotch.Loader
         public void OnApplicationQuit()
         {
             Loader.GameExit();
+        }
+    }
+
+    class BepInExLoader
+    {
+        public static void LoadBepInExUnstable()
+        {
+            SceneManager.sceneLoaded += Loader.SceneLoaded;
         }
     }
 }
