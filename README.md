@@ -21,7 +21,7 @@ Clone my [template mod](https://github.com/commandblox/Splotch-Mod-Template) to 
    - [x] Event API (More events are needed)
    - [ ] BGL (Bopl Graphics Lib) (in progress)
    - [ ] Ability API (in progress)
-   - [ ] Networking Lib
+   - [ ] Networking Lib (in progress)
  - Other features
    - [x] A general utility class
    - [x] BepInEx compatibility
