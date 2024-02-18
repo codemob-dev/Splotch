@@ -6,6 +6,7 @@ using System;
 using HarmonyLib;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using System.Collections.Generic;
 
 namespace Splotch.Loader.ModLoader
 {
@@ -59,9 +60,15 @@ namespace Splotch.Loader.ModLoader
                         using (StreamReader reader = new StreamReader(modInfoPath))
                         {
                             IDeserializer deserializer = new DeserializerBuilder()
+                                .IgnoreUnmatchedProperties()
                                 .WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
                             DeserializedModInfo deserializedData = deserializer.Deserialize<DeserializedModInfo>(reader);
                             data = deserializedData.ToModInfo();
+
+                            if (data.dll == null) throw new KeyNotFoundException("modinfo.yaml must contain the key dll!");
+                            if (data.className == null) throw new KeyNotFoundException("modinfo.yaml must contain the key className!");
+                            if (data.id == null) throw new KeyNotFoundException("modinfo.yaml must contain the key id!");
+                            if (data.name == null) throw new KeyNotFoundException("modinfo.yaml must contain the key name!");
                         }
 
                         bool loadSuccess = data.LoadMod(modFolderPath);
@@ -153,6 +160,8 @@ namespace Splotch.Loader.ModLoader
             public string Description { get; set; } = "";
             public string Version { get; set; } = "1.0";
             public string[] Authors { get; set; } = { };
+
+            public bool RequiredOnOtherClients { get; set; } = true;
         }
 
         /// <summary>
@@ -161,7 +170,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
+            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors, Attributes.RequiredOnOtherClients);
         }
     }
 
@@ -176,11 +185,12 @@ namespace Splotch.Loader.ModLoader
         public string name;
         public string description;
         public string version;
+        public bool requiredOnOtherClients;
         public string[] authors;
 
         public SplotchMod splotchMod;
         public Assembly assembly;
-        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors)
+        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors, bool requiredOnOtherClients)
         {
             this.dll = dll;
             this.className = className;
@@ -189,6 +199,7 @@ namespace Splotch.Loader.ModLoader
             this.description = description;
             this.version = version;
             this.authors = authors;
+            this.requiredOnOtherClients = requiredOnOtherClients;
         }
 
         /// <summary>

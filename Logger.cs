@@ -230,7 +230,7 @@ public static class Logger
         Console.ForegroundColor = ConsoleColor.White;
 
         Console.WriteLine(formattedString);
-        UnityEngine.Debug.LogError(formattedString);
+        UnityEngine.Debug.Log(formattedString);
 
         Console.ForegroundColor = ConsoleColor.Gray;
     }
