@@ -1,4 +1,4 @@
-# Splotch
+![Splotch logo](https://github.com/ReallyBadDeveloper/Splotch/blob/master/repo/splotchlogo.png?raw=true)
 
 ![Total lines of code in master :)](https://tokei.rs/b1/github/commandblox/splotch?category=lines)
 ![GitHub repo size](https://img.shields.io/github/repo-size/commandblox/Splotch?style=plastic)
