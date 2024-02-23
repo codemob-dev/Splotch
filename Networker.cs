@@ -6,6 +6,7 @@ using Steamworks;
 using Steamworks.Data;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Net.Configuration;
 using System.Reflection;
@@ -28,6 +29,7 @@ namespace Splotch.Network
         public static void Send(byte[] data, Connection connection)
         {
             Networker.SendMessageBypass(connection, SplotchUtils.CombineArrays<byte>(BitConverter.GetBytes(instance.id + 1), data));
+            Logger.Debug($"Sent {SplotchUtils.FormattedList(data)}");
         }
 
         public readonly ushort id;
@@ -79,8 +81,9 @@ namespace Splotch.Network
         internal static Dictionary<string, Type> registeredPackets = new Dictionary<string, Type>();
         public static Packet[] packetTypes;
 
-        private static Dictionary<Friend, bool> SplotchPresent = new Dictionary<Friend, bool>();
-        private static Dictionary<Friend, NetworkedSplotchInfo> SplotchInfoPerFriend = new Dictionary<Friend, NetworkedSplotchInfo>();
+        private static Dictionary<SteamId, Friend> steamIdFriendPairs = new Dictionary<SteamId, Friend>();
+        private static Dictionary<SteamId, bool> SplotchPresent = new Dictionary<SteamId, bool>();
+        private static Dictionary<SteamId, NetworkedSplotchInfo> SplotchInfoPerFriend = new Dictionary<SteamId, NetworkedSplotchInfo>();
         private static NetworkedSplotchInfo? LobbySplotchInfo = null;
         internal static void Load()
         {
@@ -92,15 +95,20 @@ namespace Splotch.Network
             HarmonyMethod patchMethod = new HarmonyMethod(typeof(Networker), nameof(Networker.OnConnection));
             Patcher.harmony.Patch(baseMethod, postfix: patchMethod);
 
+            Logger.Log($"Networker loaded!");
         }
 
         public static void OnConnection(Lobby lobby, Friend newPlayer)
         {
+            steamIdFriendPairs[newPlayer.Id] = newPlayer;
+            Logger.Log($"Found lobby connection {newPlayer.Name}");
             if (lobby.IsOwnedBy(SteamClient.SteamId))
             {
+                Logger.Log($"You own this lobby");
                 var connection = SteamManager.instance.connectedPlayers.Last();
                 if (connection.id == SteamClient.SteamId)
                 {
+                    Logger.Log($"Connection is you");
                     Networker.packetTypes = new Packet[Networker.registeredPackets.Count];
                     ushort i = 0;
                     foreach (var registeredPacket in registeredPackets.Values)
@@ -111,44 +119,37 @@ namespace Splotch.Network
                 }
                 else
                 {
+                    Logger.Log($"Connection is not you");
                     PacketArrangementPacket.SendPacket(connection.Connection);
+
                     TestPacket.Send(Encoding.ASCII.GetBytes("Hello world!"), connection.Connection);
                 }
             }
         }
 
-        public static bool GetSplotchPresent(Friend friend) 
+        public static bool GetSplotchPresent(SteamId steamId) 
         {
-            if (SplotchPresent.ContainsKey(friend)) return SplotchPresent[friend];
-            var splotchPresent = SteamManager.instance.currentLobby.GetMemberData(friend, "splotchPresent") == "true";
-            SplotchPresent[friend] = splotchPresent;
+            if (SplotchPresent.ContainsKey(steamId)) return SplotchPresent[steamId];
+            var splotchPresent = SteamManager.instance.currentLobby.GetMemberData(steamIdFriendPairs[steamId], "splotchPresent") == "true";
+            SplotchPresent[steamId] = splotchPresent;
             return splotchPresent;
         }
 
-        public static Friend? GetFriendFromConnection(Connection connection)
-        {
-            var id = GetSteamConnectionFromConnection(connection).id;
-            foreach (var friend in SteamManager.instance.currentLobby.Members)
-            {
-                if (friend.Id == id) return friend;
-            }
-            return null;
-        }
 
         public static SteamConnection GetSteamConnectionFromConnection(Connection connection)
         {
             foreach (var steamConnection in SteamManager.instance.connectedPlayers)
             {
-                if (steamConnection.Connection == connection) return steamConnection;
+                if (steamConnection.Connection.Id == connection.Id) return steamConnection;
             }
             return null;
         }
 
-        public static NetworkedSplotchInfo GetSplotchInfo(Friend friend)
+        public static NetworkedSplotchInfo GetSplotchInfo(SteamId steamId)
         {
-            if (SplotchInfoPerFriend.ContainsKey(friend)) return SplotchInfoPerFriend[friend];
-            var splotchInfo = NetworkedSplotchInfo.FromString(SteamManager.instance.currentLobby.GetMemberData(friend, "splotchInfo"));
-            SplotchInfoPerFriend[friend] = splotchInfo;
+            if (SplotchInfoPerFriend.ContainsKey(steamId)) return SplotchInfoPerFriend[steamId];
+            var splotchInfo = NetworkedSplotchInfo.FromString(SteamManager.instance.currentLobby.GetMemberData(steamIdFriendPairs[steamId], "splotchInfo"));
+            SplotchInfoPerFriend[steamId] = splotchInfo;
             return splotchInfo;
         }
 
@@ -173,6 +174,7 @@ namespace Splotch.Network
         {
             SplotchPresent.Clear();
             SplotchInfoPerFriend.Clear();
+            steamIdFriendPairs.Clear();
             LobbySplotchInfo = null;
 
             lobby.SetMemberData("splotchPresent", "true");
@@ -194,30 +196,40 @@ namespace Splotch.Network
         [HarmonyPrefix]
         public static void SendMessage(ref Connection __instance, ref byte[] data, ref SendType sendType)
         {
-            Friend? instanceFriend = GetFriendFromConnection(__instance);
-            if (instanceFriend.HasValue && GetSplotchPresent(instanceFriend.Value))
-                data = SplotchUtils.CombineArrays<byte>(BitConverter.GetBytes((ushort) 0), data);
+            SteamConnection steamConnection = GetSteamConnectionFromConnection(__instance);
+            if (GetSplotchPresent(steamConnection.id))
+            {
+                data = SplotchUtils.CombineArrays<byte>(BitConverter.GetBytes((ushort)0), data);
+                Logger.Debug($"Sent {SplotchUtils.FormattedList(data)}");
+            }
         }
 
         [HarmonyPatch(typeof(SteamSocket), nameof(SteamSocket.OnMessage))]
         [HarmonyPrefix]
         public static bool OnMessage(ref Connection connection, ref NetIdentity identity, ref IntPtr data, ref int size, ref long messageNum, ref long recvTime, ref int channel)
         {
-            byte[] specialData = new byte[2];
-            Marshal.Copy(data, specialData, 0, 2);
-
-            ushort messageType = BitConverter.ToUInt16(specialData, 0);
-
-            size -= 2;
-            data = IntPtr.Add(data, 2);
-            if (messageType == 0) return true;  
-            else
+            if (GetSplotchPresent(identity.SteamId))
             {
-                byte[] buffer = new byte[size];
-                Marshal.Copy(data, buffer, 0, size);
-                packetTypes[messageType - 1].OnMessage(buffer, connection, identity);
-            }
-            return messageType == 0;
+                byte[] specialData = new byte[2];
+                Marshal.Copy(data, specialData, 0, 2);
+
+                ushort messageType = BitConverter.ToUInt16(specialData, 0);
+
+                Logger.Debug($"received {SplotchUtils.FormattedList(specialData)}");
+
+                size -= 2;
+                data = IntPtr.Add(data, 2);
+                if (messageType == 0) return true;
+                else
+                {
+                    byte[] buffer = new byte[size];
+                    Marshal.Copy(data, buffer, 0, size);
+                    packetTypes[messageType - 1].OnMessage(buffer, connection, identity);
+                }
+                return messageType == 0;
+            } else
+                Logger.Debug($"splotch is not present on {connection.ConnectionName}");
+            return true;
         }
     }
     public struct NetworkedModInfo
@@ -309,7 +321,7 @@ namespace Splotch.Network
                 string popuptext = "Your mods do not match the host!";
                 if (modsToAdd.Any())
                     popuptext += "\nInstall the following mods: " + string.Join(", ", modsToAdd);
-                if (modsToAdd.Any())
+                if (modsToRemove.Any())
                     popuptext += "\nUninstall the following mods: " + string.Join(", ", modsToRemove);
 
                 SplotchGUI.ShowPopup(popuptext.Split(new[] { '\n' }, 2)[0], popuptext.Split(new[] { '\n' }, 2)[1]);

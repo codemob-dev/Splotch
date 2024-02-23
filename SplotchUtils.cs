@@ -22,6 +22,11 @@ namespace Splotch
             return selfRefField.GetValue(null) as GameSessionHandler;
         }
 
+        public static string FormattedList<T>(IEnumerable<T> list)
+        {
+            return $"{{ {string.Join<T>(", ", list)} }}";
+        }
+
         public static T[] CombineArrays<T>(T[] first, T[] second)
         {
             T[] ret = new T[first.Length + second.Length];

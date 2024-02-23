@@ -93,6 +93,7 @@ namespace Splotch.Loader.ModLoader
                 }
                 else
                 {
+                    if (modFolder.Name == "temp") continue;
                     Logger.Warning($"Invalid mod folder {modFolder.Name}!");
                     //Debug.LogWarning($"Invalid mod folder {modFolder.Name}!");
                 }
@@ -214,7 +215,7 @@ namespace Splotch.Loader.ModLoader
                 string dllAbsolutePath = Path.Combine(modFolder, dll);
                 Logger.Debug($"Loading {dllAbsolutePath}");
 
-                assembly = Assembly.LoadFrom(dllAbsolutePath);
+                assembly = Assembly.Load(File.ReadAllBytes(dllAbsolutePath));
 
                 Logger.Debug($"Loaded {assembly}");
                 Type assemblyEntrypoint = assembly.GetType(className);
