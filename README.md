@@ -5,7 +5,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/commandblox/Splotch?style=plastic&label=latest%20release)
 ![Contributors](https://img.shields.io/badge/contributors-5-orange?style=plastic)
 ![Downloads](https://img.shields.io/badge/downloads-1000%2Fmonth-blue?style=plastic)
-![GitHub issues](https://img.shields.io/github/issues/username/repo?style=plastic)
+![GitHub issues](https://img.shields.io/github/issues/commandblox/splotch?style=plastic)
 ![Maintenance](https://img.shields.io/badge/maintenance-yes-brightgreen?style=plastic)
 
 Splotch is a mod loader for the game [Bopl Battle](https://zapraygames.com/). It runs on [Doorstop](https://github.com/NeighTools/UnityDoorstop) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
