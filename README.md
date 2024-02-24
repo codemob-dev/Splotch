@@ -3,8 +3,20 @@
 ![Total lines of code in master :)](https://tokei.rs/b1/github/commandblox/splotch?category=lines)
 ![GitHub repo size](https://img.shields.io/github/repo-size/commandblox/Splotch?style=plastic)
 ![GitHub Release](https://img.shields.io/github/v/release/commandblox/Splotch?style=plastic&label=latest%20release)
+![Contributors](https://img.shields.io/badge/contributors-5-orange)
+![Downloads](https://img.shields.io/badge/downloads-1000%2Fmonth-blue)
+![GitHub issues](https://img.shields.io/github/issues/username/repo)
+![Maintenance](https://img.shields.io/badge/maintenance-yes-brightgreen)
+![Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows%20%7C%20macOS-lightgrey)
 
-Splotch is a mod loader for the game Bopl Battle. It runs on [Doorstop](https://github.com/NeighTools/UnityDoorstop) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
+Splotch is a mod loader for the game [Bopl Battle](https://zapraygames.com/). It runs on [Doorstop](https://github.com/NeighTools/UnityDoorstop) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
+
+Table on contents
+[Introduction](##Installation)
+[Section 1](##Mod-Creation)
+[Section 2](##Roadmap)
+[Conclusion](##How-to-contribute)
+[help](#help)
 
 ## Installation
 Extract the [latest release](https://github.com/commandblox/Splotch/releases/latest) into the game files of Bopl Battle and start the game. The folder `bopl_mods` should be generated. Put any mods you want to install and start the game and you should see the names of the mods you installed appear in the bottom right. The same procedure can be done to update the game. If you do this with BepInEx installed make sure that the `doorstop.cfg` file is from Splotch.
@@ -26,3 +38,9 @@ Clone my [template mod](https://github.com/commandblox/Splotch-Mod-Template) to 
    - [x] A general utility class
    - [x] BepInEx compatibility
  - [ ] Built-in mod manager
+
+## How to contribute
+
+## Help
+The discord can be found [here](https://discord.gg/official-bopl-battle-modding-comunity-1175164882388275310)
+You can ask on the discord for more help!
