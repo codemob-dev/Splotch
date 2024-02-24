@@ -11,12 +11,13 @@
 
 Splotch is a mod loader for the game [Bopl Battle](https://zapraygames.com/). It runs on [Doorstop](https://github.com/NeighTools/UnityDoorstop) and [HarmonyX](https://github.com/BepInEx/HarmonyX).
 
-Table on contents
-[Introduction](##Installation)
-[Section 1](##Mod-Creation)
-[Section 2](##Roadmap)
-[Conclusion](##How-to-contribute)
-[help](#help)
+# Table of Contents
+1. [Installation](#Installation)
+2. [Mod creation](#Mod-creation)
+3. [Roadmap](#Roadmap)
+4. [How to contribute](#How-to-contribute)
+5. [help](#help)
+
 
 ## Installation
 Extract the [latest release](https://github.com/commandblox/Splotch/releases/latest) into the game files of Bopl Battle and start the game. The folder `bopl_mods` should be generated. Put any mods you want to install and start the game and you should see the names of the mods you installed appear in the bottom right. The same procedure can be done to update the game. If you do this with BepInEx installed make sure that the `doorstop.cfg` file is from Splotch.
