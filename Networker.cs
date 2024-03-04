@@ -101,7 +101,7 @@ namespace Splotch.Network
         public static void OnConnection(Lobby lobby, Friend newPlayer)
         {
             steamIdFriendPairs[newPlayer.Id] = newPlayer;
-            Logger.Log($"Found lobby connection {newPlayer.Name}");
+            Logger.Log($"Found lobby connection {newPlayer.Name} with steam id {newPlayer.Id}");
             if (lobby.IsOwnedBy(SteamClient.SteamId))
             {
                 Logger.Log($"You own this lobby");
@@ -130,6 +130,7 @@ namespace Splotch.Network
         public static bool GetSplotchPresent(SteamId steamId) 
         {
             if (SplotchPresent.ContainsKey(steamId)) return SplotchPresent[steamId];
+            if (!steamIdFriendPairs.ContainsKey(steamId)) Logger.Warning($"{steamId} is not present in the steamIdFriendPairs! Only {SplotchUtils.FormattedList<SteamId>(steamIdFriendPairs.Keys)} is present");
             var splotchPresent = SteamManager.instance.currentLobby.GetMemberData(steamIdFriendPairs[steamId], "splotchPresent") == "true";
             SplotchPresent[steamId] = splotchPresent;
             return splotchPresent;
@@ -172,11 +173,6 @@ namespace Splotch.Network
 
         private static void OnLobbyEnteredCallback(Lobby lobby)
         {
-            SplotchPresent.Clear();
-            SplotchInfoPerFriend.Clear();
-            steamIdFriendPairs.Clear();
-            LobbySplotchInfo = null;
-
             lobby.SetMemberData("splotchPresent", "true");
             lobby.SetMemberData("splotchInfo", NetworkedSplotchInfo.FromCurrent().ToString());
 
