@@ -44,7 +44,3 @@ Clone my [template mod](https://github.com/commandblox/Splotch-Mod-Template) to 
 ## Help
 The discord can be found [here](https://discord.gg/official-bopl-battle-modding-comunity-1175164882388275310)
 You can ask on the discord for more help!
-
-## Stats
-![Alt](https://repobeats.axiom.co/api/embed/73152aeb1c330cae3e9e9c2797c36e97972a9f55.svg "Repobeats analytics image")
-<!-- change this at https://repobeats.axiom.co -->
