@@ -18,6 +18,8 @@ namespace Splotch.Loader
     /// </summary>
     public static class Loader
     {
+        public static string ThunderStoreModPath = null;
+
         public static bool BepInExPresent { get { return Directory.Exists(@"BepInEx\core\"); } }
 
         struct SplotchConfigContainer
@@ -39,6 +41,13 @@ namespace Splotch.Loader
             Logger.InitLogger();
 
             Logger.Log($"Entering main menu on version {VersionChecker.currentVersionString}");
+
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+
+            foreach (string arg in commandLineArgs)
+            {
+                Console.WriteLine(arg);
+            }
 
             enteredScene = true;
             Patcher.DoPatching();
@@ -77,6 +86,32 @@ namespace Splotch.Loader
         /// </summary>
         public static void Main()
         {
+            // Test for the "--begone-splotch" command line arg so we can run vanilla
+
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+
+            bool IsTheCustomThunderstoreModLoaderPathNext_QuestionMark = false;
+            foreach (string arg in commandLineArgs)
+            {
+                if (IsTheCustomThunderstoreModLoaderPathNext_QuestionMark)
+                {
+                    ThunderStoreModPath = arg;
+                }
+
+                IsTheCustomThunderstoreModLoaderPathNext_QuestionMark = false;
+
+                // I have no clue why, it just breaks randomly and inoften when this is not .Contains()
+                if (arg.Contains("--begone-splotch")) 
+                {
+                    return;
+                }
+
+                if (arg.Contains("--splotch-mods-dir"))
+                {
+                    IsTheCustomThunderstoreModLoaderPathNext_QuestionMark = true;
+                }
+            }
+
             if (BepInExPresent)
                 LoadBepInEx();
 

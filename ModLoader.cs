@@ -14,9 +14,9 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     internal static class ModLoader
     {
-        static readonly string MOD_FOLDER_PATH          = "splotch_mods";
+        static string MOD_FOLDER_PATH                   = "splotch_mods";       // Can't have as readonly because thunderstore
         static readonly string MOD_INFO_FILE_NAME       = "modinfo.yaml";
-        static readonly string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp";
+        static string UNZIPPED_MOD_TEMP_FOLDER          = @"splotch_mods\temp"; // Can't have as readonly because thunderstore
 
         public static DirectoryInfo modFolderDirectory;
         public static DirectoryInfo modFolderTempDirectory;
@@ -26,6 +26,14 @@ namespace Splotch.Loader.ModLoader
         internal static void LoadMods()
         {
             Logger.Log("Starting to load mods...");
+
+            if(Loader.ThunderStoreModPath != null)
+            {
+                Logger.Log($"Loading mods from Thunderstore mod manager path {Loader.ThunderStoreModPath}");
+                MOD_FOLDER_PATH = Loader.ThunderStoreModPath;
+                UNZIPPED_MOD_TEMP_FOLDER = Loader.ThunderStoreModPath + "\\temp";
+            }
+
             int modCountLoaded     = 0;
             int modCountTot        = 0;
             modFolderDirectory     = Directory.CreateDirectory(MOD_FOLDER_PATH);
