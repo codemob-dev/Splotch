@@ -52,7 +52,7 @@ Contributions to Splotch are welcome! Feel free to check out the [issues](https:
 - **Developer**: Codemob
 - **Developer**: WackyModder
 - **Wiki and Docs**: Melon
-- 
+
 ## License
 This project is licensed under the [WPTFL License](LICENSE).
 
