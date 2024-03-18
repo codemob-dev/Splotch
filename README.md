@@ -1,3 +1,5 @@
+![image](githublogo.png)
+
 # Splotch
 
 [![Total lines of code in master](https://tokei.rs/b1/github/commandblox/splotch?category=lines)](https://github.com/commandblox/Splotch)
