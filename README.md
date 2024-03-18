@@ -56,7 +56,7 @@ Contributions to Splotch are welcome! Feel free to check out the [issues](https:
 - **Wiki and Docs**: Melon
 
 ## License
-This project is licensed under the [WPTFL License](LICENSE).
+This project is licensed under the [WPFTL License](LICENSE).
 
 ## Help
 If you need assistance, join our [Discord server](https://discord.gg/official-bopl-battle-modding-comunity-1175164882388275310). You can ask for help or discuss anything related to Splotch and modding for Bopl Battle.
