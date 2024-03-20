@@ -6,6 +6,7 @@ using System;
 using HarmonyLib;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using System.Collections.Generic;
 
 namespace Splotch.Loader.ModLoader
 {
@@ -45,9 +46,12 @@ namespace Splotch.Loader.ModLoader
                 }
             }
 
+			Dictionary<string, ModInfo> loadedMods = new Dictionary<string, ModInfo>();
 
-            foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories().AddRangeToArray(modFolderTempDirectory.GetDirectories()))
+			foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories().AddRangeToArray(modFolderTempDirectory.GetDirectories()))
             {
+                if (modFolder.FullName == modFolderTempDirectory.FullName) continue;
+
                 modCountTot++;
                 string modFolderPath = modFolder.FullName;
                 string modInfoPath = Path.Combine(modFolderPath, MOD_INFO_FILE_NAME);
@@ -67,8 +71,7 @@ namespace Splotch.Loader.ModLoader
                         bool loadSuccess = data.LoadMod(modFolderPath);
                         if (loadSuccess)
                         {
-                            Logger.Log($"{data} loaded");
-                            modCountLoaded++;
+                            loadedMods.Add(data.id, data);
                             //Debug.Log($"{data} loaded");
                         }
                         else
@@ -90,6 +93,39 @@ namespace Splotch.Loader.ModLoader
                     //Debug.LogWarning($"Invalid mod folder {modFolder.Name}!");
                 }
             }
+
+			void LoadWithDependencies(ModInfo mod)
+			{
+				bool modHasAllDep = true;
+
+				foreach (string depId in mod.dependencies)
+				{
+                    if (loadedMods.TryGetValue(depId, out ModInfo depMod))
+                    {
+                        if (depMod.initalized) continue;
+                        LoadWithDependencies(depMod);
+                    }
+                    else
+                    {
+                        modHasAllDep = false;
+                        Logger.Warning($"{mod.name} is missing dependency '{depId}'");
+                    }
+				}
+
+                if (!modHasAllDep) return;
+
+				Logger.Log($"{mod} loaded");
+				modCountLoaded++;
+
+                mod.FinishInit();
+			}
+
+			foreach (KeyValuePair<string, ModInfo> pair in loadedMods)
+            {
+                ModInfo mod = pair.Value;
+                if (mod.initalized) continue;
+                LoadWithDependencies(mod);
+			}
 
             Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
         }
@@ -153,7 +189,8 @@ namespace Splotch.Loader.ModLoader
             public string Description { get; set; } = "";
             public string Version { get; set; } = "1.0";
             public string[] Authors { get; set; } = { };
-        }
+            public string[] Dependencies { get; set; } = { };
+		}
 
         /// <summary>
         /// Converts the class into the final <c>ModInfo</c> format.
@@ -161,7 +198,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors);
+            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors, Attributes.Dependencies);
         }
     }
 
@@ -177,10 +214,13 @@ namespace Splotch.Loader.ModLoader
         public string description;
         public string version;
         public string[] authors;
+        public string[] dependencies;
 
-        public SplotchMod splotchMod;
+		public SplotchMod splotchMod;
         public Assembly assembly;
-        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors)
+        internal bool initalized = false;
+
+        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors, string[] dependencies)
         {
             this.dll = dll;
             this.className = className;
@@ -189,7 +229,18 @@ namespace Splotch.Loader.ModLoader
             this.description = description;
             this.version = version;
             this.authors = authors;
-        }
+            this.dependencies = dependencies;
+		}
+
+		/// <summary>
+		/// Called after every dependency loaded and there was no error.
+		/// </summary>
+		internal void FinishInit()
+        {
+			initalized = true;
+			splotchMod.OnLoad();
+			ModManager.loadedMods.Add(this);
+		}
 
         /// <summary>
         /// Attempts to load the mod from the metadata using the <c>dll</c> and <c>className</c> fields to determine the entrypoint.
@@ -217,9 +268,6 @@ namespace Splotch.Loader.ModLoader
                 {
                     splotchMod = (SplotchMod)Activator.CreateInstance(assemblyEntrypoint);
                     splotchMod.Setup(this);
-                    splotchMod.OnLoad();
-
-                    ModManager.loadedMods.Add(this);
 
                     return true;
                 }
@@ -231,7 +279,7 @@ namespace Splotch.Loader.ModLoader
             }
             catch (Exception ex)
             {
-                Logger.Error($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
+                Logger.Error($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}\n{ex.GetType()}");
                 //Debug.LogError($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
             }
             return false;
