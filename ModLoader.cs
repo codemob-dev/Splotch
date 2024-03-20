@@ -63,9 +63,15 @@ namespace Splotch.Loader.ModLoader
                         using (StreamReader reader = new StreamReader(modInfoPath))
                         {
                             IDeserializer deserializer = new DeserializerBuilder()
+                                .IgnoreUnmatchedProperties()
                                 .WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
                             DeserializedModInfo deserializedData = deserializer.Deserialize<DeserializedModInfo>(reader);
                             data = deserializedData.ToModInfo();
+
+                            if (data.dll == null) throw new KeyNotFoundException("modinfo.yaml must contain the key dll!");
+                            if (data.className == null) throw new KeyNotFoundException("modinfo.yaml must contain the key className!");
+                            if (data.id == null) throw new KeyNotFoundException("modinfo.yaml must contain the key id!");
+                            if (data.name == null) throw new KeyNotFoundException("modinfo.yaml must contain the key name!");
                         }
 
                         bool loadSuccess = data.LoadMod(modFolderPath);
@@ -89,6 +95,7 @@ namespace Splotch.Loader.ModLoader
                 }
                 else
                 {
+                    if (modFolder.Name == "temp") continue;
                     Logger.Warning($"Invalid mod folder {modFolder.Name}!");
                     //Debug.LogWarning($"Invalid mod folder {modFolder.Name}!");
                 }
@@ -190,7 +197,9 @@ namespace Splotch.Loader.ModLoader
             public string Version { get; set; } = "1.0";
             public string[] Authors { get; set; } = { };
             public string[] Dependencies { get; set; } = { };
-		}
+
+            public bool RequiredOnOtherClients { get; set; } = true;
+        }
 
         /// <summary>
         /// Converts the class into the final <c>ModInfo</c> format.
@@ -198,7 +207,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors, Attributes.Dependencies);
+            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors, Attributes.Dependencies, Attributes.RequiredOnOtherClients);
         }
     }
 
@@ -213,6 +222,7 @@ namespace Splotch.Loader.ModLoader
         public string name;
         public string description;
         public string version;
+        public bool requiredOnOtherClients;
         public string[] authors;
         public string[] dependencies;
 
@@ -220,7 +230,7 @@ namespace Splotch.Loader.ModLoader
         public Assembly assembly;
         internal bool initalized = false;
 
-        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors, string[] dependencies)
+        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors, string[] dependencies, bool requiredOnOtherClients)
         {
             this.dll = dll;
             this.className = className;
@@ -241,6 +251,8 @@ namespace Splotch.Loader.ModLoader
 			splotchMod.OnLoad();
 			ModManager.loadedMods.Add(this);
 		}
+            this.requiredOnOtherClients = requiredOnOtherClients;
+        }
 
         /// <summary>
         /// Attempts to load the mod from the metadata using the <c>dll</c> and <c>className</c> fields to determine the entrypoint.
@@ -254,7 +266,7 @@ namespace Splotch.Loader.ModLoader
                 string dllAbsolutePath = Path.Combine(modFolder, dll);
                 Logger.Debug($"Loading {dllAbsolutePath}");
 
-                assembly = Assembly.LoadFrom(dllAbsolutePath);
+                assembly = Assembly.Load(File.ReadAllBytes(dllAbsolutePath));
 
                 Logger.Debug($"Loaded {assembly}");
                 Type assemblyEntrypoint = assembly.GetType(className);
