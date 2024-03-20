@@ -131,6 +131,7 @@ namespace Splotch.Loader.ModLoader
 
 	    // load patches
 	    Splotch.Patches.SplotchPatches.ApplyPatches(); // someone please fix my code bad please im beg of you!
+	    Logger.Log("Lag patch fixed!")
         }
 
         public static void RecursiveDelete(DirectoryInfo baseDir)
