@@ -53,7 +53,8 @@ Contributions to Splotch are welcome! Feel free to check out the [issues](https:
 ## Credits
 - **Developer**: Codemob
 - **Developer**: WackyModder
-- **Wiki and Docs**: Melon
+- **Contributer**: Almafa64
+- **Wiki, Docs & Contributer**: Melon
 
 ## License
 This project is licensed under the [WPFTL License](LICENSE).
