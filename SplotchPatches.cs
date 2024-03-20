@@ -23,7 +23,7 @@ namespace Splotch.Patches
             // Code from Client - 306-334 - Need to patch this but eh, will do that later.
             public static bool UpdateInputHistoryReplacement(Client __instance, InputPacketUpdate update)
             {
-                        uint num = this.inputHistoryHeadSeqNum;
+                uint num = this.inputHistoryHeadSeqNum;
         		int num2 = (int)(update.seqNumber - num);
         		if (num2 > 32)
         		{
