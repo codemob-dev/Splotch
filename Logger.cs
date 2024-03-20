@@ -91,7 +91,7 @@ public static class Logger
 
 
         Logger.Log("Logging initialized.");
-
+        Logger.Log("Starting Mod logging!");
     }
     private static string PrevMSG = "";
     private static void HandleUnityLogs(string condition, string stackTrace, LogType type)
