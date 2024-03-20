@@ -128,6 +128,9 @@ namespace Splotch.Loader.ModLoader
 			}
 
             Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
+
+	    // load patches
+	    Splotch.Patches.SplotchPatches.ApplyPatches();
         }
 
         public static void RecursiveDelete(DirectoryInfo baseDir)
