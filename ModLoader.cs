@@ -130,7 +130,7 @@ namespace Splotch.Loader.ModLoader
             Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
 
 	    // load patches
-	    Splotch.Patches.SplotchPatches.ApplyPatches();
+	    Splotch.Patches.SplotchPatches.ApplyPatches(); // someone please fix my code bad please im beg of you!
         }
 
         public static void RecursiveDelete(DirectoryInfo baseDir)
