@@ -10,8 +10,6 @@ using System.Linq;
 using System.Collections;
 using HarmonyLib;
 using MonoMod.Utils;
-using Splotch.Network;
-using Splotch.UserInterface;
 
 namespace Splotch.Loader
 {
@@ -43,10 +41,9 @@ namespace Splotch.Loader
             Logger.Log($"Entering main menu on version {VersionChecker.currentVersionString}");
 
             enteredScene = true;
+            Patcher.DoPatching();
             ModLoader.ModLoader.LoadMods();
             EventManager.Load();
-            Networker.Load();
-            UserInterface.SplotchGUI.Load();
 
             GameObject obj = new GameObject("Unloader", new Type[] { typeof(UnLoader) });
             Logger.Debug("Finished main menu loading!");
