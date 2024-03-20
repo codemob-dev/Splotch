@@ -130,8 +130,9 @@ namespace Splotch.Loader.ModLoader
             Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
 
 	    // load patches
-	    Splotch.Patches.SplotchPatches.ApplyPatches(); // someone please fix my code bad please im beg of you!
-	    Logger.Log("Lag patch fixed!")
+	    // Splotch.Patches.SplotchPatches.ApplyPatches(); // someone please fix my code bad please im beg of you!
+	    // Logger.Log("Lag patch fixed!")
+	    // Found out codemob already made HarmonyLoader.cs soo.... use that
         }
 
         public static void RecursiveDelete(DirectoryInfo baseDir)
