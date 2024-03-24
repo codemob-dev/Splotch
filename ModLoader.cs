@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Reflection;
@@ -15,9 +15,9 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     internal static class ModLoader
     {
-        static readonly string MOD_FOLDER_PATH          = "splotch_mods";
-        static readonly string MOD_INFO_FILE_NAME       = "modinfo.yaml";
-        static readonly string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp";
+        static string MOD_FOLDER_PATH = "splotch_mods";
+        static readonly string MOD_INFO_FILE_NAME = "modinfo.yaml";
+        static string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp"; // Can't have as readonly because thunderstore
 
         public static DirectoryInfo modFolderDirectory;
         public static DirectoryInfo modFolderTempDirectory;
@@ -27,6 +27,12 @@ namespace Splotch.Loader.ModLoader
         internal static void LoadMods()
         {
             Logger.Log("Starting to load mods...");
+            if (Loader.ModPath != null)
+            {
+                Logger.Log($"Loading mods from Thunderstore mod manager path {Loader.ModPath}");
+                MOD_FOLDER_PATH = Loader.ModPath;
+                UNZIPPED_MOD_TEMP_FOLDER = Loader.ModPath + "\\temp";
+            }
             int modCountLoaded     = 0;
             int modCountTot        = 0;
             modFolderDirectory     = Directory.CreateDirectory(MOD_FOLDER_PATH);
@@ -131,8 +137,6 @@ namespace Splotch.Loader.ModLoader
 
 	    // load patches
 	    // Splotch.Patches.SplotchPatches.ApplyPatches(); // someone please fix my code bad please im beg of you!
-	    // Logger.Log("Lag patch fixed!")
-	    // Found out codemob already made HarmonyLoader.cs soo.... use that
         }
 
         public static void RecursiveDelete(DirectoryInfo baseDir)
