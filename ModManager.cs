@@ -1,4 +1,4 @@
-﻿using Splotch.Loader.ModLoader;
+using Splotch.Loader.ModLoader;
 using System.Collections.Generic;
 
 namespace Splotch
@@ -45,6 +45,7 @@ namespace Splotch
                 }
                 i++;
             }
+            Logger.Log(modInfoString);
             return modInfoString;
         }
     }
