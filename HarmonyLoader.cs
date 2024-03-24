@@ -7,7 +7,7 @@ namespace Splotch.Loader
     /// </summary>
     internal static class Patcher
     {
-        public static Harmony harmony = new Harmony("com.codemob.splotch");
+        public static Harmony harmony = new Harmony("com.splotch.splotchfixes");
         /// <summary>
         /// Runs all of Splotch's patches.
         /// </summary>
@@ -63,6 +63,13 @@ namespace Splotch.Loader
 	            return false;
 	            }
 	     */
+	// put your patch here
+        }
+	    
+	[HarmonyPatch]
+        internal static class Patches
+        {
+	// second one for ease
         }
     }
 
