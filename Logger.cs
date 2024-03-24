@@ -1,4 +1,4 @@
-﻿using Splotch.Loader;
+using Splotch.Loader;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -59,7 +59,7 @@ public static class Logger
         Thread.Sleep(1000);
 
         // Connects the console window to bopl
-        AttachConsole((uint) process.Id);
+        AttachConsole((uint)process.Id);
 
         // Sets the output to the console window thing
         StreamWriter sw = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
@@ -84,14 +84,14 @@ public static class Logger
                 process.Close();
         }
 
-        Logger.Log("Log test");
-        Logger.Warning("Warn test");
-        Logger.Error("Error test");
-        Logger.Debug("Debug test");
+        Log("Log test");
+        Warning("Warn test");
+        Error("Error test");
+        Debug("Debug test");
 
 
-        Logger.Log("Logging initialized.");
-        Logger.Log("Starting Mod logging!");
+        Log("Logging initialized.");
+        Log("Starting Mod logging!");
     }
     private static string PrevMSG = "";
     private static void HandleUnityLogs(string condition, string stackTrace, LogType type)
@@ -103,22 +103,22 @@ public static class Logger
         switch (type)
         {
             case LogType.Error:
-                Logger.Error(condition, true);
-                Logger.Error(stackTrace, true); 
+                Error(condition, true);
+                Error(stackTrace, true);
                 break;
             case LogType.Warning:
-                Logger.Warning(condition, true); 
+                Warning(condition, true);
                 break;
             case LogType.Log:
-                Logger.Log(condition, true); 
+                Log(condition, true);
                 break;
             case LogType.Exception:
-                Logger.Error(condition, true);
-                Logger.Error(stackTrace, true); 
+                Error(condition, true);
+                Error(stackTrace, true);
                 break;
             case LogType.Assert:
-                Logger.Error(condition, true);
-                Logger.Error(stackTrace, true); 
+                Error(condition, true);
+                Error(stackTrace, true);
                 break;
         }
     }
