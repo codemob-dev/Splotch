@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 
 namespace Splotch.Loader
 {
@@ -63,7 +63,6 @@ namespace Splotch.Loader
 	            return false;
 	            }
 	     */
-	// put your patch here
         }
     }
 
