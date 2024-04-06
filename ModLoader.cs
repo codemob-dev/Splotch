@@ -17,7 +17,7 @@ namespace Splotch.Loader.ModLoader
     {
         static string MOD_FOLDER_PATH = "splotch_mods";
         static readonly string MOD_INFO_FILE_NAME = "modinfo.yaml";
-        static string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp"; // Can't have as readonly because thunderstore
+        static string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp"; 
 
         public static DirectoryInfo modFolderDirectory;
         public static DirectoryInfo modFolderTempDirectory;
@@ -29,7 +29,7 @@ namespace Splotch.Loader.ModLoader
             Logger.Log("Starting to load mods...");
             if (Loader.ModPath != null)
             {
-                Logger.Log($"Loading mods from Thunderstore mod manager path {Loader.ModPath}");
+                Logger.Log($"Loading mods from path {Loader.ModPath}");
                 MOD_FOLDER_PATH = Loader.ModPath;
                 UNZIPPED_MOD_TEMP_FOLDER = Loader.ModPath + "\\temp";
             }
@@ -56,7 +56,11 @@ namespace Splotch.Loader.ModLoader
 
 			foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories().AddRangeToArray(modFolderTempDirectory.GetDirectories()))
             {
-                if (modFolder.FullName == modFolderTempDirectory.FullName) continue;
+                if (modFolder.FullName == modFolderTempDirectory.FullName)
+                {
+                    Logger.Debug("Scanning temp folder for unzipped mods...");
+                    continue;
+                }
 
                 modCountTot++;
                 string modFolderPath = modFolder.FullName;

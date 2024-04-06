@@ -65,12 +65,6 @@ namespace Splotch.Loader
 	     */
 	// put your patch here
         }
-	    
-	[HarmonyPatch]
-        internal static class Patches
-        {
-	// second one for ease
-        }
     }
 
 }

@@ -6,8 +6,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
-
-
 public static class Logger
 {
     /// <summary>
@@ -33,8 +31,6 @@ public static class Logger
             //Console.WriteLine("Unable to determine calling class.");
         }
     }
-
-
     /// <summary>
     /// Initializes the console.
     /// 
@@ -43,7 +39,6 @@ public static class Logger
     internal static void InitLogger()
     {
         VersionChecker.RunVersionChecker();
-
         // Create a new process
         Process process = new Process();
         process.StartInfo.FileName = "cmd.exe";
@@ -51,47 +46,38 @@ public static class Logger
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = !Splotch.Config.LoadedSplotchConfig.consoleEnabled && !VersionChecker.updateNeeded;  // Set this to true if you want to hide the window (Might be how we disable the window)
-
         // Start the process
         process.Start();
-
         // It breaks if this isn't here
         Thread.Sleep(1000);
-
         // Connects the console window to bopl
         AttachConsole((uint)process.Id);
-
         // Sets the output to the console window thing
         StreamWriter sw = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
         Console.SetOut(sw);
-
         // Set the title of the window
         Console.Title = $"Splotch Log version {VersionChecker.currentVersionString}";
-
         Application.logMessageReceived += HandleUnityLogs;
-
         if (VersionChecker.updateNeeded)
         {
             Console.WriteLine($"Update {VersionChecker.targetVersionString} needed! The current installed version is {VersionChecker.currentVersionString} Press [P] to open the download page or any other key to continue");
-
             ConsoleKeyInfo key = Console.ReadKey();
             if (key.KeyChar == 'p')
             {
                 Process.Start("https://github.com/commandblox/Splotch/releases");
             }
-
             if (!Splotch.Config.LoadedSplotchConfig.consoleEnabled)
                 process.Close();
         }
+        Logger.Log("Log test");
+        Logger.Warning("Warn test");
+        Logger.Error("Error test");
+        Logger.Debug("Debug test");
 
-        Log("Log test");
-        Warning("Warn test");
-        Error("Error test");
-        Debug("Debug test");
 
+        Logger.Log("Logging initialized.");
 
-        Log("Logging initialized.");
-        Log("Starting Mod logging!");
+        Logger.Log("Starting Mod logging!");
     }
     private static string PrevMSG = "";
     private static void HandleUnityLogs(string condition, string stackTrace, LogType type)
@@ -103,27 +89,25 @@ public static class Logger
         switch (type)
         {
             case LogType.Error:
-                Error(condition, true);
-                Error(stackTrace, true);
+                Logger.Error(condition, true);
+                Logger.Error(stackTrace, true);
                 break;
             case LogType.Warning:
-                Warning(condition, true);
+                Logger.Warning(condition, true);
                 break;
             case LogType.Log:
-                Log(condition, true);
+                Logger.Log(condition, true);
                 break;
             case LogType.Exception:
-                Error(condition, true);
-                Error(stackTrace, true);
+                Logger.Error(condition, true);
+                Logger.Error(stackTrace, true);
                 break;
             case LogType.Assert:
-                Error(condition, true);
-                Error(stackTrace, true);
+                Logger.Error(condition, true);
+                Logger.Error(stackTrace, true);
                 break;
         }
     }
-
-
     /// <summary>
     /// Logs into console and output_log.txt
     /// </summary>
@@ -132,7 +116,6 @@ public static class Logger
         string formattedString;
         if (doublestack)
         {
-
             formattedString = $"[INFO    : Unity] {message}";
         }
         else
@@ -140,15 +123,11 @@ public static class Logger
             formattedString = $"[INFO    : {GetCallingClass()}] {message}";
         }
         //string formattedString = $"[INFO    : {GetCallingClass()}] {message}";
-
         PrevMSG = formattedString;
-
         Console.ForegroundColor = ConsoleColor.Gray;
-
         Console.WriteLine(formattedString);
         UnityEngine.Debug.Log(formattedString);
     }
-
     /// <summary>
     /// Logs a warning into console and logs to output_log.txt
     /// </summary>
@@ -157,24 +136,18 @@ public static class Logger
         string formattedString;
         if (doublestack)
         {
-
             formattedString = $"[WARNING : Unity] {message}";
         }
         else
         {
             formattedString = $"[WARNING : {GetCallingClass()}] {message}";
         }
-
         PrevMSG = formattedString;
-
         Console.ForegroundColor = ConsoleColor.Yellow;
-
         Console.WriteLine(formattedString);
         UnityEngine.Debug.LogWarning(formattedString);
-
         Console.ForegroundColor = ConsoleColor.Gray;
     }
-
     /// <summary>
     /// Logs an error into console and logs to output_log.txt
     /// </summary>
@@ -183,7 +156,6 @@ public static class Logger
         string formattedString;
         if (doublestack)
         {
-
             formattedString = $"[ERROR   : Unity] {message}";
         }
         else
@@ -191,17 +163,12 @@ public static class Logger
             formattedString = $"[ERROR   : {GetCallingClass()}] {message}";
         }
         //string formattedString = $"[ERROR   : {GetCallingClass()}] {message}";
-
         PrevMSG = formattedString;
-
         Console.ForegroundColor = ConsoleColor.Red;
-
         Console.WriteLine(formattedString);
         UnityEngine.Debug.LogError(formattedString);
-
         Console.ForegroundColor = ConsoleColor.Gray;
     }
-
     /// <summary>
     /// Logs an debug message into console and logs to output_log.txt.
     /// 
@@ -213,28 +180,21 @@ public static class Logger
         {
             return;
         }
-
         string formattedString;
         if (doublestack)
         {
-
             formattedString = $"[DEBUG   : Unity] {message}";
         }
         else
         {
             formattedString = $"[DEBUG   : {GetCallingClass()}] {message}";
         }
-
         PrevMSG = formattedString;
-
         Console.ForegroundColor = ConsoleColor.White;
-
         Console.WriteLine(formattedString);
         UnityEngine.Debug.LogError(formattedString);
-
         Console.ForegroundColor = ConsoleColor.Gray;
     }
-
     // AttachConsole lets me "hook" the logger into the thing
     [DllImport("kernel32.dll")]
     private static extern bool AttachConsole(uint dwProcessId);

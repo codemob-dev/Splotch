@@ -39,7 +39,7 @@ namespace Splotch.Loader
             string[] lines = result.Replace("\n\r", "\n").Replace("\r\n", "\n").Split('\n');
             version = lines[0].Split('=')[1];
             nightly = lines[1].Split('=')[1];
-            Logger.log(version)
+            Logger.Log(version);
         }
     }
 }

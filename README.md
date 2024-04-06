@@ -36,7 +36,7 @@ To create mods for Splotch, clone the [template mod](https://github.com/commandb
 ### Mod Loading
 - [x] Basic functionality
 - [x] Loading from zip files
-- [ ] Mod dependencies
+- [x] Mod dependencies
 ### APIs
 - [x] Event API (More events needed)
 - [ ] BGL (Bopl Graphics Lib) (in progress)
