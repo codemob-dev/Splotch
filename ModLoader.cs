@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Reflection;
@@ -15,9 +15,9 @@ namespace Splotch.Loader.ModLoader
     /// </summary>
     internal static class ModLoader
     {
-        static readonly string MOD_FOLDER_PATH          = "splotch_mods";
-        static readonly string MOD_INFO_FILE_NAME       = "modinfo.yaml";
-        static readonly string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp";
+        static string MOD_FOLDER_PATH = "splotch_mods";
+        static readonly string MOD_INFO_FILE_NAME = "modinfo.yaml";
+        static string UNZIPPED_MOD_TEMP_FOLDER = @"splotch_mods\temp"; // Can't have as readonly because thunderstore
 
         public static DirectoryInfo modFolderDirectory;
         public static DirectoryInfo modFolderTempDirectory;
@@ -27,6 +27,12 @@ namespace Splotch.Loader.ModLoader
         internal static void LoadMods()
         {
             Logger.Log("Starting to load mods...");
+            if (Loader.ModPath != null)
+            {
+                Logger.Log($"Loading mods from Thunderstore mod manager path {Loader.ModPath}");
+                MOD_FOLDER_PATH = Loader.ModPath;
+                UNZIPPED_MOD_TEMP_FOLDER = Loader.ModPath + "\\temp";
+            }
             int modCountLoaded     = 0;
             int modCountTot        = 0;
             modFolderDirectory     = Directory.CreateDirectory(MOD_FOLDER_PATH);
@@ -46,9 +52,12 @@ namespace Splotch.Loader.ModLoader
                 }
             }
 
+			Dictionary<string, ModInfo> loadedMods = new Dictionary<string, ModInfo>();
 
-            foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories().AddRangeToArray(modFolderTempDirectory.GetDirectories()))
+			foreach (DirectoryInfo modFolder in modFolderDirectory.GetDirectories().AddRangeToArray(modFolderTempDirectory.GetDirectories()))
             {
+                if (modFolder.FullName == modFolderTempDirectory.FullName) continue;
+
                 modCountTot++;
                 string modFolderPath = modFolder.FullName;
                 string modInfoPath = Path.Combine(modFolderPath, MOD_INFO_FILE_NAME);
@@ -60,22 +69,15 @@ namespace Splotch.Loader.ModLoader
                         using (StreamReader reader = new StreamReader(modInfoPath))
                         {
                             IDeserializer deserializer = new DeserializerBuilder()
-                                .IgnoreUnmatchedProperties()
                                 .WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
                             DeserializedModInfo deserializedData = deserializer.Deserialize<DeserializedModInfo>(reader);
                             data = deserializedData.ToModInfo();
-
-                            if (data.dll == null) throw new KeyNotFoundException("modinfo.yaml must contain the key dll!");
-                            if (data.className == null) throw new KeyNotFoundException("modinfo.yaml must contain the key className!");
-                            if (data.id == null) throw new KeyNotFoundException("modinfo.yaml must contain the key id!");
-                            if (data.name == null) throw new KeyNotFoundException("modinfo.yaml must contain the key name!");
                         }
 
                         bool loadSuccess = data.LoadMod(modFolderPath);
                         if (loadSuccess)
                         {
-                            Logger.Log($"{data} loaded");
-                            modCountLoaded++;
+                            loadedMods.Add(data.id, data);
                             //Debug.Log($"{data} loaded");
                         }
                         else
@@ -93,13 +95,48 @@ namespace Splotch.Loader.ModLoader
                 }
                 else
                 {
-                    if (modFolder.Name == "temp") continue;
                     Logger.Warning($"Invalid mod folder {modFolder.Name}!");
                     //Debug.LogWarning($"Invalid mod folder {modFolder.Name}!");
                 }
             }
 
+			void LoadWithDependencies(ModInfo mod)
+			{
+				bool modHasAllDep = true;
+
+				foreach (string depId in mod.dependencies)
+				{
+                    if (loadedMods.TryGetValue(depId, out ModInfo depMod))
+                    {
+                        if (depMod.initalized) continue;
+                        LoadWithDependencies(depMod);
+                    }
+                    else
+                    {
+                        modHasAllDep = false;
+                        Logger.Warning($"{mod.name} is missing dependency '{depId}'");
+                    }
+				}
+
+                if (!modHasAllDep) return;
+
+				Logger.Log($"{mod} loaded");
+				modCountLoaded++;
+
+                mod.FinishInit();
+			}
+
+			foreach (KeyValuePair<string, ModInfo> pair in loadedMods)
+            {
+                ModInfo mod = pair.Value;
+                if (mod.initalized) continue;
+                LoadWithDependencies(mod);
+			}
+
             Logger.Log($"Loaded {modCountLoaded}/{modCountTot} mods successfully!");
+
+	    // load patches
+	    // Splotch.Patches.SplotchPatches.ApplyPatches(); // someone please fix my code bad please im beg of you!
         }
 
         public static void RecursiveDelete(DirectoryInfo baseDir)
@@ -161,9 +198,8 @@ namespace Splotch.Loader.ModLoader
             public string Description { get; set; } = "";
             public string Version { get; set; } = "1.0";
             public string[] Authors { get; set; } = { };
-
-            public bool RequiredOnOtherClients { get; set; } = true;
-        }
+            public string[] Dependencies { get; set; } = { };
+		}
 
         /// <summary>
         /// Converts the class into the final <c>ModInfo</c> format.
@@ -171,7 +207,7 @@ namespace Splotch.Loader.ModLoader
         /// <returns>The <c>ModInfo</c> representation of the class</returns>
         internal ModInfo ToModInfo()
         {
-            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors, Attributes.RequiredOnOtherClients);
+            return new ModInfo(Entrypoint.Dll, Entrypoint.ClassName, Attributes.Id, Attributes.Name, Attributes.Description, Attributes.Version, Attributes.Authors, Attributes.Dependencies);
         }
     }
 
@@ -186,12 +222,14 @@ namespace Splotch.Loader.ModLoader
         public string name;
         public string description;
         public string version;
-        public bool requiredOnOtherClients;
         public string[] authors;
+        public string[] dependencies;
 
-        public SplotchMod splotchMod;
+		public SplotchMod splotchMod;
         public Assembly assembly;
-        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors, bool requiredOnOtherClients)
+        internal bool initalized = false;
+
+        internal ModInfo(string dll, string className, string id, string name, string description, string version, string[] authors, string[] dependencies)
         {
             this.dll = dll;
             this.className = className;
@@ -200,8 +238,18 @@ namespace Splotch.Loader.ModLoader
             this.description = description;
             this.version = version;
             this.authors = authors;
-            this.requiredOnOtherClients = requiredOnOtherClients;
-        }
+            this.dependencies = dependencies;
+		}
+
+		/// <summary>
+		/// Called after every dependency loaded and there was no error.
+		/// </summary>
+		internal void FinishInit()
+        {
+			initalized = true;
+			splotchMod.OnLoad();
+			ModManager.loadedMods.Add(this);
+		}
 
         /// <summary>
         /// Attempts to load the mod from the metadata using the <c>dll</c> and <c>className</c> fields to determine the entrypoint.
@@ -215,7 +263,7 @@ namespace Splotch.Loader.ModLoader
                 string dllAbsolutePath = Path.Combine(modFolder, dll);
                 Logger.Debug($"Loading {dllAbsolutePath}");
 
-                assembly = Assembly.Load(File.ReadAllBytes(dllAbsolutePath));
+                assembly = Assembly.LoadFrom(dllAbsolutePath);
 
                 Logger.Debug($"Loaded {assembly}");
                 Type assemblyEntrypoint = assembly.GetType(className);
@@ -229,9 +277,6 @@ namespace Splotch.Loader.ModLoader
                 {
                     splotchMod = (SplotchMod)Activator.CreateInstance(assemblyEntrypoint);
                     splotchMod.Setup(this);
-                    splotchMod.OnLoad();
-
-                    ModManager.loadedMods.Add(this);
 
                     return true;
                 }
@@ -243,7 +288,7 @@ namespace Splotch.Loader.ModLoader
             }
             catch (Exception ex)
             {
-                Logger.Error($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
+                Logger.Error($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}\n{ex.GetType()}");
                 //Debug.LogError($"An error occurred while loading the mod {name}: \n{ex.Message}\n{ex.StackTrace}");
             }
             return false;

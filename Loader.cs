@@ -10,8 +10,6 @@ using System.Linq;
 using System.Collections;
 using HarmonyLib;
 using MonoMod.Utils;
-using Splotch.Network;
-using Splotch.UserInterface;
 
 namespace Splotch.Loader
 {
@@ -21,6 +19,7 @@ namespace Splotch.Loader
     public static class Loader
     {
         public static bool BepInExPresent { get { return Directory.Exists(@"BepInEx\core\"); } }
+        public static string ModPath = null;
 
         struct SplotchConfigContainer
         {
@@ -42,11 +41,17 @@ namespace Splotch.Loader
 
             Logger.Log($"Entering main menu on version {VersionChecker.currentVersionString}");
 
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+
+            foreach (string arg in commandLineArgs)
+            {
+                Console.WriteLine(arg);
+            }
+
             enteredScene = true;
+            Patcher.DoPatching();
             ModLoader.ModLoader.LoadMods();
             EventManager.Load();
-            Networker.Load();
-            UserInterface.SplotchGUI.Load();
 
             GameObject obj = new GameObject("Unloader", new Type[] { typeof(UnLoader) });
             Logger.Debug("Finished main menu loading!");
@@ -80,6 +85,31 @@ namespace Splotch.Loader
         /// </summary>
         public static void Main()
         {
+            // Test for the "--begone-splotch" command line arg so we can run vanilla
+
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+
+            bool CustomPath = false;
+            foreach (string arg in commandLineArgs)
+            {
+                if (CustomPath)
+                {
+                    ModPath = arg;
+                }
+
+                CustomPath = false;
+
+                // I have no clue why, it just breaks randomly and inoften when this is not .Contains()
+                if (arg.Contains("--begone-splotch"))
+                {
+                    return;
+                }
+
+                if (arg.Contains("--splotch-mods-dir"))
+                {
+                    CustomPath = true;
+                }
+            }
             if (BepInExPresent)
                 LoadBepInEx();
 

@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 // X: major versions
 // Y: feature addition/ removal
 // Z: small patch/ bugfix
-[assembly: AssemblyVersion("0.5.0")]
+[assembly: AssemblyVersion("0.5.1")]

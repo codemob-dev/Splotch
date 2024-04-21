@@ -49,7 +49,7 @@ namespace Splotch.Loader
             textComponent.font = LocalizedText.localizationTable.GetFont(Settings.Get().Language, false);
             textComponent.color = Color.Lerp(Color.blue, Color.black, 0.6f);
 
-            // not sure what this is I stole it from WackyModer lol
+            // not sure what this is I stole it from WackyModer lol  -- Melon, It stops the text from being clickced and blocking the buttons I think
             textComponent.raycastTarget = false;
 
             textComponent.fontSize = 13;
