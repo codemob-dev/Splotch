@@ -1,5 +1,9 @@
 ![image](githublogo.png)
 
+
+# WARNING!
+### Splotch is going to be turned into a BepInEx library. DO NOT make any new mods for this and DO NOT install it to run any mods.
+
 # Splotch
 
 [![Total lines of code in master](https://tokei.rs/b1/github/commandblox/splotch?category=lines)](https://github.com/commandblox/Splotch)
